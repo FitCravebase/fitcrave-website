@@ -544,7 +544,7 @@ export default function App() {
 
       {/* MARQUEE TICKER */}
       <div style={{ overflow: "hidden", padding: "18px 0", borderBottom: `1px solid ${t.bd}`, background: t.bg }}>
-        <div style={{ display: "flex", width: "max-content", animation: "mTick 35s linear infinite" }}>
+        <div style={{ display: "flex", width: "max-content", animation: "mTick 60s linear infinite" }}>
           {[...Array(2)].map((_, rep) => <div key={rep} style={{ display: "flex", alignItems: "center", whiteSpace: "nowrap" }}>
             {["AI-Powered Nutrition", "Macro-Perfect Meal Delivery", "9-Dimension Health Score", "Dark Kitchen Network", "MealSnap Food Recognition", "Menu Intelligence (Mess + Restaurant)", "Dynamic Workout Programming", "Bet Challenges with Real Stakes", "National Leaderboard System", "Identity Transformation Engine", "Auto-Logged Delivery", "₹299/mo Pro Plan", "Community Challenges", "Team vs Team Battles"].map((item, i) => <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 20, paddingRight: 20 }}>
               <span style={{ fontFamily: SM, fontSize: ".68rem", fontWeight: 600, color: t.ac, letterSpacing: ".04em" }}>{item}</span>
@@ -580,7 +580,7 @@ export default function App() {
 
       {/* TEAM */}
       <section style={{ padding: "100px 0" }}><div style={W}><Rv><div style={{ maxWidth: 680, marginBottom: 40 }}><span style={{ fontFamily: SM, fontSize: ".66rem", fontWeight: 700, color: t.ac, letterSpacing: ".14em", textTransform: "uppercase" }}>( 05 ) The Team</span><h2 className="sh" style={{ fontSize: "clamp(1.8rem,3.5vw,2.4rem)", lineHeight: 1.08, letterSpacing: "-.03em", marginTop: 20 }}><span style={{ fontFamily: SS, fontWeight: 800 }}>Built by </span><span key={"tm" + mode} style={{ fontFamily: SF, fontStyle: "italic", ...acT }}>people who live the problem.</span></h2></div></Rv></div>
-        <div style={{ overflow: "hidden", padding: "8px 0" }}><div style={{ display: "flex", gap: 20, width: "max-content", animation: `teamScroll ${Math.max(allMembers.length * 10, 20)}s linear infinite` }}>
+        <div style={{ overflow: "hidden", padding: "8px 0" }}><div style={{ display: "flex", gap: 20, width: "max-content", animation: `teamScroll ${Math.max(allMembers.length * 30, 60)}s linear infinite` }}>
           {marquee.map((m, i) => <div key={i} style={{ minWidth: 300, maxWidth: 340, background: t.bg3, border: `1px solid ${t.bd}`, borderRadius: 18, padding: "32px 26px", flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}><Avatar src={m.photo} initials={m.initials} size={52} acG={acG} /><div><div style={{ fontSize: ".95rem", fontWeight: 700 }}>{m.name}</div><div style={{ fontFamily: SM, fontSize: ".65rem", color: t.ac, fontWeight: 600 }}>{m.role}</div>{m.education && <div style={{ fontFamily: SM, fontSize: ".58rem", color: t.tx3 }}>{m.education}</div>}</div></div>
             {m.bio && <p style={{ fontFamily: SF, fontStyle: "italic", fontSize: ".88rem", lineHeight: 1.65, color: t.tx2 }}>{m.bio}</p>}
