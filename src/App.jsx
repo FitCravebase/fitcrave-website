@@ -30,6 +30,12 @@ const DEFAULT_FOUNDER = {
 
 const DEFAULT_TEAM = [
   {
+    id: 0, name: "Priyanshu Shaw", role: "CO-FOUNDER",
+    education: "IIT Kharagpur · Dual Degree · Mechanical Engineering",
+    bio: "I don’t believe in motivation — I believe in systems that force consistency. FitCrave is being built to remove friction between intention and execution. Because real transformation is operational, not emotional.",
+    initials: "PS", photo: ""
+  },
+  {
     id: 1, name: "Raghuveer Patil", role: "AI ENGINEER",
     education: "IIT Kharagpur · Dual Degree · Ocean Engineering & AI",
     bio: "A dedicated fitness enthusiast turned engineer. I built FitCrave to bridge the gap between tracking and execution, creating the ultimate system to turn discipline into a lifelong habit.",
@@ -580,7 +586,7 @@ export default function App() {
 
       {/* TEAM */}
       <section style={{ padding: "100px 0" }}><div style={W}><Rv><div style={{ maxWidth: 680, marginBottom: 40 }}><span style={{ fontFamily: SM, fontSize: ".66rem", fontWeight: 700, color: t.ac, letterSpacing: ".14em", textTransform: "uppercase" }}>( 05 ) The Team</span><h2 className="sh" style={{ fontSize: "clamp(1.8rem,3.5vw,2.4rem)", lineHeight: 1.08, letterSpacing: "-.03em", marginTop: 20 }}><span style={{ fontFamily: SS, fontWeight: 800 }}>Built by </span><span key={"tm" + mode} style={{ fontFamily: SF, fontStyle: "italic", ...acT }}>people who live the problem.</span></h2></div></Rv></div>
-        <div style={{ overflow: "hidden", padding: "8px 0" }}><div style={{ display: "flex", gap: 20, width: "max-content", animation: `teamScroll ${Math.max(allMembers.length * 30, 60)}s linear infinite` }}>
+        <div style={{ overflow: "hidden", padding: "8px 0" }}><div style={{ display: "flex", gap: 20, width: "max-content", animation: `teamScroll ${Math.max(allMembers.length * 45, 90)}s linear infinite` }}>
           {marquee.map((m, i) => <div key={i} style={{ minWidth: 300, maxWidth: 340, background: t.bg3, border: `1px solid ${t.bd}`, borderRadius: 18, padding: "32px 26px", flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}><Avatar src={m.photo} initials={m.initials} size={52} acG={acG} /><div><div style={{ fontSize: ".95rem", fontWeight: 700 }}>{m.name}</div><div style={{ fontFamily: SM, fontSize: ".65rem", color: t.ac, fontWeight: 600 }}>{m.role}</div>{m.education && <div style={{ fontFamily: SM, fontSize: ".58rem", color: t.tx3 }}>{m.education}</div>}</div></div>
             {m.bio && <p style={{ fontFamily: SF, fontStyle: "italic", fontSize: ".88rem", lineHeight: 1.65, color: t.tx2 }}>{m.bio}</p>}
