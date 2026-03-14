@@ -1,12 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-
-// POLYFILL FOR WINDOW.STORAGE
-if (typeof window !== 'undefined' && !window.storage) {
-  window.storage = {
-    get: async (k) => { const v = localStorage.getItem(k); return v ? { value: v } : null; },
-    set: async (k, v) => localStorage.setItem(k, v)
-  };
-}
+import { db, auth } from "./firebase";
+import { doc, getDoc, setDoc, addDoc, collection, getDocs, deleteDoc, onSnapshot, increment } from "firebase/firestore";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 
 
@@ -263,36 +258,64 @@ export default function App() {
 
   /* ─── LOAD ALL GLOBAL DATA ON MOUNT ─── */
   const loadGlobalData = useCallback(async () => {
-    const [cfgData, wlData, teamData, founderData] = await Promise.all([
-      DB.get("fc_config"),
-      DB.get("fc_wl"),
-      DB.get("fc_team"),
-      DB.get("fc_founder"),
-    ]);
-    if (cfgData) { setCfg(cfgData); setAnnText(cfgData.announcement || ""); setPsLink(cfgData.playstoreLink || ""); setAsLink(cfgData.appstoreLink || ""); }
-    if (wlData) { setWl(wlData); setWlCount(wlData.length); }
-    if (teamData && teamData.length > 0) setTeam(teamData);
-    else setTeam(DEFAULT_TEAM);
-    if (founderData) setFounder(founderData);
-    setDbReady(true);
+    try {
+      const [cfgSnap, teamSnap, founderSnap] = await Promise.all([
+        getDoc(doc(db, "website", "config")),
+        getDoc(doc(db, "website", "team")),
+        getDoc(doc(db, "website", "founder")),
+      ]);
+
+      const cfgData = cfgSnap.exists() ? cfgSnap.data() : DEFAULT_CONFIG;
+      setCfg(cfgData);
+      setAnnText(cfgData.announcement || "");
+      setPsLink(cfgData.playstoreLink || "");
+      setAsLink(cfgData.appstoreLink || "");
+
+      const teamData = teamSnap.exists() ? teamSnap.data().members : DEFAULT_TEAM;
+      setTeam(teamData);
+
+      const founderData = founderSnap.exists() ? founderSnap.data() : DEFAULT_FOUNDER;
+      setFounder(founderData);
+
+      // Waitlist count (approximate or separate counter doc recommended for scale)
+      const wlSnap = await getDocs(collection(db, "waitlist"));
+      setWl(wlSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setWlCount(wlSnap.size);
+
+      setDbReady(true);
+    } catch (e) {
+      console.error("Firebase Load Error:", e);
+      setDbReady(true); // Allow fallback display
+    }
   }, []);
 
   useEffect(() => { loadGlobalData() }, [loadGlobalData]);
 
-  // Poll for config changes every 8s for near-real-time updates
+  // Real-time config updates
   useEffect(() => {
-    pollRef.current = setInterval(async () => {
-      const cfgData = await DB.get("fc_config");
-      if (cfgData) setCfg(prev => JSON.stringify(prev) !== JSON.stringify(cfgData) ? cfgData : prev);
-    }, 8000);
-    return () => clearInterval(pollRef.current);
+    const unsub = onSnapshot(doc(db, "website", "config"), (snap) => {
+      if (snap.exists()) {
+        const next = snap.data();
+        setCfg(prev => JSON.stringify(prev) !== JSON.stringify(next) ? next : prev);
+      }
+    });
+    return () => unsub();
   }, []);
 
   useEffect(() => { setTimeout(() => setHeroIn(true), 300) }, []);
   useEffect(() => { const fn = () => setScrolled(scrollY > 50); addEventListener("scroll", fn, { passive: true }); return () => removeEventListener("scroll", fn) }, []);
   useEffect(() => { const fn = e => { if (e.ctrlKey && e.shiftKey && e.key === "A") { e.preventDefault(); setShowAdmin(v => !v); loadGlobalData() } }; addEventListener("keydown", fn); return () => removeEventListener("keydown", fn) }, [loadGlobalData]);
 
-  const saveWl = async entry => { try { let l = await DB.get("fc_wl") || []; l.push({ ...entry, id: Date.now(), ts: new Date().toISOString() }); await DB.set("fc_wl", l); setWl(l); setWlCount(l.length) } catch (e) { } };
+  const saveWl = async entry => {
+    try {
+      const d = { ...entry, ts: new Date().toISOString() };
+      await addDoc(collection(db, "waitlist"), d);
+      // Optimistic update
+      const nw = [{ ...d, id: "temp" }, ...wl];
+      setWl(nw);
+      setWlCount(nw.length);
+    } catch (e) { console.error("Save WL Error:", e); }
+  };
   const go = id => { document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }); setMobNav(false) };
   const doSubmit = async () => { if (!vld) return; setLoading(true); await saveWl({ email, name: uname || "—", goal: goal || "—" }); setTimeout(() => { setSubmitted(true); setLoading(false) }, 1200) };
   const handlePhoto = cb => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*"; inp.onchange = e => { const f = e.target.files?.[0]; if (!f) return; if (f.size > 500000) { alert("Max 500KB"); return } const r = new FileReader(); r.onload = ev => cb(ev.target.result); r.readAsDataURL(f) }; inp.click() };
@@ -301,10 +324,12 @@ export default function App() {
 
   // Save config helper
   const saveCfg = async (updates) => {
-    const next = { ...cfg, ...updates };
-    setCfg(next);
-    await DB.set("fc_config", next);
-    flashSave();
+    try {
+      const next = { ...cfg, ...updates };
+      setCfg(next);
+      await setDoc(doc(db, "website", "config"), next, { merge: true });
+      flashSave();
+    } catch (e) { console.error("Save Config Error:", e); }
   };
 
   const navItems = [{ l: "Problem", id: "problem" }, { l: "System", id: "solution" }, { l: "Community", id: "community" }, { l: "FAQ", id: "faq" }];
@@ -356,8 +381,21 @@ export default function App() {
         <div onClick={e => e.stopPropagation()} style={{ background: t.bg3, border: `1px solid ${t.bd}`, borderRadius: 20, padding: 28, maxWidth: 860, width: "100%", maxHeight: "85vh", overflow: "auto" }}>
           {!adminAuth ? <div style={{ textAlign: "center", padding: 40 }}>
             <h3 style={{ fontWeight: 700, marginBottom: 16 }}>Admin Access</h3>
-            <input type="password" value={adminPwd} onChange={e => setAdminPwd(e.target.value)} placeholder="Password" style={{ ...inpS, maxWidth: 300, margin: "0 auto", display: "block", textAlign: "center", marginBottom: 12 }} onKeyDown={e => { if (e.key === "Enter") { const h = Array.from(adminPwd).reduce((a, c) => ((a << 5) - a) + c.charCodeAt(0), 0); if (h === 483822598 || adminPwd === "fitcrave2025") setAdminAuth(true) } }} />
-            <button onClick={() => { const h = Array.from(adminPwd).reduce((a, c) => ((a << 5) - a) + c.charCodeAt(0), 0); if (h === 483822598 || adminPwd === "fitcrave2025") setAdminAuth(true) }} style={{ background: t.ac, color: "#fff", border: "none", borderRadius: 8, padding: "10px 32px", fontWeight: 700, cursor: "pointer" }}>Login</button>
+            <input type="email" value={uname} onChange={e => setUname(e.target.value)} placeholder="admin@fitcrave.co" style={{ ...inpS, maxWidth: 300, margin: "0 auto", display: "block", textAlign: "center", marginBottom: 12 }} />
+            <input type="password" value={adminPwd} onChange={e => setAdminPwd(e.target.value)} placeholder="Password" style={{ ...inpS, maxWidth: 300, margin: "0 auto", display: "block", textAlign: "center", marginBottom: 12 }} onKeyDown={async e => {
+              if (e.key === "Enter") {
+                try {
+                  await signInWithEmailAndPassword(auth, uname || "admin@fitcrave.co", adminPwd);
+                  setAdminAuth(true);
+                } catch (e) { alert("Invalid credentials") }
+              }
+            }} />
+            <button onClick={async () => {
+              try {
+                await signInWithEmailAndPassword(auth, uname || "admin@fitcrave.co", adminPwd);
+                setAdminAuth(true);
+              } catch (e) { alert("Invalid credentials") }
+            }} style={{ background: t.ac, color: "#fff", border: "none", borderRadius: 8, padding: "10px 32px", fontWeight: 700, cursor: "pointer" }}>Login</button>
             <p style={{ fontSize: ".6rem", color: t.tx3, marginTop: 12, fontFamily: SM }}>Ctrl+Shift+A to toggle</p>
           </div> : <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
@@ -437,7 +475,7 @@ export default function App() {
               <input value={founder.role} onChange={e => setFounder({ ...founder, role: e.target.value })} placeholder="Role" style={{ ...inpS, marginBottom: 10 }} />
               <input value={founder.education} onChange={e => setFounder({ ...founder, education: e.target.value })} placeholder="Education" style={{ ...inpS, marginBottom: 10 }} />
               <input value={founder.bio} onChange={e => setFounder({ ...founder, bio: e.target.value })} placeholder="Bio" style={{ ...inpS, marginBottom: 10 }} />
-              <button onClick={async () => { await DB.set("fc_founder", founder); flashSave("Founder saved globally") }} style={{ background: t.ac, color: "#fff", border: "none", borderRadius: 8, padding: "8px 20px", fontSize: ".75rem", fontWeight: 700, cursor: "pointer", fontFamily: SM }}>Save Founder</button>
+              <button onClick={async () => { try { await setDoc(doc(db, "website", "founder"), founder); flashSave("Founder saved globally") } catch (e) { } }} style={{ background: t.ac, color: "#fff", border: "none", borderRadius: 8, padding: "8px 20px", fontSize: ".75rem", fontWeight: 700, cursor: "pointer", fontFamily: SM }}>Save Founder</button>
             </div>}
 
             {/* ─── TEAM TAB ─── */}
@@ -452,14 +490,14 @@ export default function App() {
                 <input placeholder="Role" value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} style={{ ...inpS, marginBottom: 10 }} />
                 <input placeholder="Education" value={form.education} onChange={e => setForm({ ...form, education: e.target.value })} style={{ ...inpS, marginBottom: 10 }} />
                 <input placeholder="Bio" value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} style={{ ...inpS, marginBottom: 10 }} />
-                <button onClick={async () => { if (!form.name) return; const m = { ...form, id: Date.now(), initials: form.initials || form.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) }; let nt; if (editIdx !== null) { nt = team.map((x, i) => i === editIdx ? { ...x, ...m } : x); setEditIdx(null) } else { nt = [...team, m] } await DB.set("fc_team", nt); setTeam(nt); setForm({ name: "", role: "", education: "", bio: "", initials: "", photo: "" }); flashSave("Team saved globally") }} style={{ background: t.ac, color: "#fff", border: "none", borderRadius: 8, padding: "8px 20px", fontSize: ".75rem", fontWeight: 700, cursor: "pointer", fontFamily: SM }}>{editIdx !== null ? "Update" : "Add"}</button>
+                <button onClick={async () => { if (!form.name) return; const m = { ...form, id: Date.now(), initials: form.initials || form.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) }; let nt; if (editIdx !== null) { nt = team.map((x, i) => i === editIdx ? { ...x, ...m } : x); setEditIdx(null) } else { nt = [...team, m] } try { await setDoc(doc(db, "website", "team"), { members: nt }); setTeam(nt); setForm({ name: "", role: "", education: "", bio: "", initials: "", photo: "" }); flashSave("Team saved globally") } catch (e) { } }} style={{ background: t.ac, color: "#fff", border: "none", borderRadius: 8, padding: "8px 20px", fontSize: ".75rem", fontWeight: 700, cursor: "pointer", fontFamily: SM }}>{editIdx !== null ? "Update" : "Add"}</button>
                 {editIdx !== null && <button onClick={() => { setEditIdx(null); setForm({ name: "", role: "", education: "", bio: "", initials: "", photo: "" }) }} style={{ background: "none", border: `1px solid ${t.bd}`, borderRadius: 8, padding: "8px 16px", fontSize: ".72rem", cursor: "pointer", color: t.tx3, marginLeft: 8 }}>Cancel</button>}
               </div>
               {team.map((m, i) => <div key={m.id || i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", background: t.bg2, borderRadius: 12, border: `1px solid ${t.bd}`, marginBottom: 8 }}>
                 <Avatar src={m.photo} initials={m.initials} size={36} acG={acG} />
                 <div style={{ flex: 1 }}><div style={{ fontSize: ".82rem", fontWeight: 700 }}>{m.name}</div><div style={{ fontSize: ".62rem", color: t.ac, fontFamily: SM }}>{m.role}</div></div>
                 <button onClick={() => { setEditIdx(i); setForm({ name: m.name, role: m.role || "", education: m.education || "", bio: m.bio || "", initials: m.initials || "", photo: m.photo || "" }) }} style={{ background: "none", border: "none", cursor: "pointer", color: t.tx3, fontSize: ".72rem" }}>Edit</button>
-                <button onClick={async () => { const nt = team.filter((_, idx) => idx !== i); await DB.set("fc_team", nt); setTeam(nt); flashSave("Member removed") }} style={{ background: "none", border: "none", cursor: "pointer", color: "#EF4444", fontSize: ".72rem" }}>Del</button>
+                <button onClick={async () => { const nt = team.filter((_, idx) => idx !== i); try { await setDoc(doc(db, "website", "team"), { members: nt }); setTeam(nt); flashSave("Member removed") } catch (e) { } }} style={{ background: "none", border: "none", cursor: "pointer", color: "#EF4444", fontSize: ".72rem" }}>Del</button>
               </div>)}
             </div>}
 
@@ -469,7 +507,11 @@ export default function App() {
                 <p style={{ fontFamily: SM, fontSize: ".72rem", color: t.tx3 }}>{wl.length} signups total</p>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button onClick={exportCSV} style={{ background: t.acS, color: t.ac, border: "none", borderRadius: 8, padding: "6px 14px", fontSize: ".72rem", fontWeight: 700, cursor: "pointer", fontFamily: SM }}>Export CSV</button>
-                  {wl.length > 0 && <button onClick={async () => { if (confirm("Clear all waitlist entries? This cannot be undone.")) { await DB.set("fc_wl", []); setWl([]); setWlCount(0); flashSave("Waitlist cleared") } }} style={{ background: "none", border: `1px solid #EF4444`, borderRadius: 8, padding: "6px 14px", fontSize: ".72rem", fontWeight: 700, cursor: "pointer", fontFamily: SM, color: "#EF4444" }}>Clear All</button>}
+                  {wl.length > 0 && <button onClick={async () => {
+                    if (confirm("Clear all waitlist entries (locally)? Database clearing requires manual console action for security.")) {
+                      setWl([]); setWlCount(0); flashSave("Waitlist view cleared")
+                    }
+                  }} style={{ background: "none", border: `1px solid #EF4444`, borderRadius: 8, padding: "6px 14px", fontSize: ".72rem", fontWeight: 700, cursor: "pointer", fontFamily: SM, color: "#EF4444" }}>Clear View</button>}
                 </div>
               </div>
               {wl.length === 0 ? <p style={{ color: t.tx3, textAlign: "center", padding: 30 }}>No signups yet.</p> :
