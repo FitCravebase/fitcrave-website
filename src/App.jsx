@@ -22,11 +22,38 @@ const DEFAULT_CONFIG = {
   waitlistEnabled: true,
 };
 const DEFAULT_FOUNDER = {
-  name: "Charan Teja", role: "FOUNDER & CEO",
+  name: "Charan Teja", role: "FOUNDER",
   education: "IIT Kharagpur · Dual Degree · Ocean Engineering",
   bio: "\"I built FitCrave because I lived the problem. Every app tracked — none executed. So I'm building the system that turns discipline into identity.\"",
   initials: "CT", photo: ""
 };
+
+const DEFAULT_TEAM = [
+  {
+    id: 1, name: "Raghuveer Patil", role: "AI ENGINEER",
+    education: "IIT Kharagpur · Dual Degree · Ocean Engineering & AI",
+    bio: "A dedicated fitness enthusiast turned engineer. I built FitCrave to bridge the gap between tracking and execution, creating the ultimate system to turn discipline into a lifelong habit.",
+    initials: "RP", photo: ""
+  },
+  {
+    id: 2, name: "Sharath S.", role: "AI ENGINEER",
+    education: "IIT Kharagpur · Dual Degree · Electrical & AI",
+    bio: "Bridging the gap between electrical engineering and advanced AI to create intelligent health systems that adapt to you.",
+    initials: "SS", photo: ""
+  },
+  {
+    id: 3, name: "Rachit Gupta", role: "AI ENGINEER",
+    education: "IIT Kharagpur · Dual Degree · Agriculture & Financial Planning",
+    bio: "Combining agricultural insight with financial planning to optimize the most important investment you'll ever make—your health.",
+    initials: "RG", photo: ""
+  },
+  {
+    id: 4, name: "Jay Tandia", role: "UI UX DESIGNER",
+    education: "IIT Kharagpur · Dual Degree · Biotechnology",
+    bio: "Fusing biotechnological knowledge with pixel-perfect design to create an interface that feels as intuitive as it is powerful.",
+    initials: "JT", photo: ""
+  }
+];
 
 /* ─── Shared helpers ─── */
 function Rv({ children, delay, y }) {
@@ -209,7 +236,7 @@ function TermsPage({ t, SF, SS, SM, acG, acT, onBack }) {
 export default function App() {
   const [mode, setMode] = useState("dark");
   const [page, setPage] = useState("home"); // "home" | "privacy" | "terms"
-  const [scrolled, setScrolled] = useState(false); const [email, setEmail] = useState(""); const [uname, setUname] = useState(""); const [goal, setGoal] = useState(""); const [submitted, setSubmitted] = useState(false); const [loading, setLoading] = useState(false); const [openFaq, setOpenFaq] = useState(null); const [mobNav, setMobNav] = useState(false); const [heroIn, setHeroIn] = useState(false); const [showAdmin, setShowAdmin] = useState(false); const [adminAuth, setAdminAuth] = useState(false); const [adminPwd, setAdminPwd] = useState(""); const [adminTab, setAdminTab] = useState("founder"); const [wlCount, setWlCount] = useState(0); const [wl, setWl] = useState([]); const [team, setTeam] = useState([]);
+  const [scrolled, setScrolled] = useState(false); const [email, setEmail] = useState(""); const [uname, setUname] = useState(""); const [goal, setGoal] = useState(""); const [submitted, setSubmitted] = useState(false); const [loading, setLoading] = useState(false); const [openFaq, setOpenFaq] = useState(null); const [mobNav, setMobNav] = useState(false); const [heroIn, setHeroIn] = useState(false); const [showAdmin, setShowAdmin] = useState(false); const [adminAuth, setAdminAuth] = useState(false); const [adminPwd, setAdminPwd] = useState(""); const [adminTab, setAdminTab] = useState("founder"); const [wlCount, setWlCount] = useState(0); const [wl, setWl] = useState([]); const [team, setTeam] = useState(DEFAULT_TEAM);
   const [founder, setFounder] = useState(DEFAULT_FOUNDER);
   const [cfg, setCfg] = useState(DEFAULT_CONFIG);
   const [form, setForm] = useState({ name: "", role: "", education: "", bio: "", initials: "", photo: "" }); const [editIdx, setEditIdx] = useState(null);
@@ -238,7 +265,8 @@ export default function App() {
     ]);
     if (cfgData) { setCfg(cfgData); setAnnText(cfgData.announcement || ""); setPsLink(cfgData.playstoreLink || ""); setAsLink(cfgData.appstoreLink || ""); }
     if (wlData) { setWl(wlData); setWlCount(wlData.length); }
-    if (teamData) setTeam(teamData);
+    if (teamData && teamData.length > 0) setTeam(teamData);
+    else setTeam(DEFAULT_TEAM);
     if (founderData) setFounder(founderData);
     setDbReady(true);
   }, []);
