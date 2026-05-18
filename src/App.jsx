@@ -1,14 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+﻿import { useState, useEffect, useRef, useCallback } from "react";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { db, auth } from "./firebase";
-import { doc, getDoc, setDoc, addDoc, collection, getDocs, deleteDoc, onSnapshot, increment } from "firebase/firestore";
+import { doc, getDoc, setDoc, addDoc, collection, getDocs, onSnapshot } from "firebase/firestore";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import { useSiteTheme, FONTS_LINK } from "./theme";
 
-
-
-const L = { bg: "#FAFAF8", bg2: "#F0EDE6", bg3: "#FFF", tx: "#0F0F0F", tx2: "#3D3D3D", tx3: "#888", ac: "#6D28D9", ac2: "#8B5CF6", acS: "#EDE9FE", bd: "#DDD9D2", gls: "rgba(250,250,248,.85)", sh2: "0 12px 64px rgba(109,40,217,.14)", ok: "#059669", okB: "#ECFDF5", warn: "#D97706" };
-const D = { bg: "#07070B", bg2: "#0D0D15", bg3: "#14141E", tx: "#F0F0F5", tx2: "#9898B0", tx3: "#55556B", ac: "#A78BFA", ac2: "#C4B5FD", acS: "rgba(167,139,250,.1)", bd: "#1E1E32", gls: "rgba(7,7,11,.82)", sh2: "0 12px 64px rgba(167,139,250,.1)", ok: "#34D399", okB: "rgba(52,211,153,.08)", warn: "#FBBF24" };
-
-// Default global config — used as fallback before DB loads
+// Default global config â€” used as fallback before DB loads
 const DEFAULT_CONFIG = {
   appLaunched: false,
   playstoreLink: "",
@@ -18,45 +16,45 @@ const DEFAULT_CONFIG = {
 };
 const DEFAULT_FOUNDER = {
   name: "Charan Teja", role: "FOUNDER",
-  education: "IIT Kharagpur · Dual Degree · Ocean Engineering",
-  bio: "\"I built FitCrave because I lived the problem. Every app tracked — none executed. So I'm building the system that turns discipline into identity.\"",
+  education: "IIT Kharagpur Â· Dual Degree Â· Ocean Engineering",
+  bio: "\"I built FitCrave because I lived the problem. Every app tracked â€” none executed. So I'm building the system that turns discipline into identity.\"",
   initials: "CT", photo: ""
 };
 
 const DEFAULT_TEAM = [
   {
     id: 0, name: "Priyanshu Shaw", role: "CO-FOUNDER",
-    education: "IIT Kharagpur · Dual Degree · Mechanical Engineering",
-    bio: "I don’t believe in motivation — I believe in systems that force consistency. FitCrave is being built to remove friction between intention and execution. Because real transformation is operational, not emotional.",
+    education: "IIT Kharagpur Â· Dual Degree Â· Mechanical Engineering",
+    bio: "I donâ€™t believe in motivation â€” I believe in systems that force consistency. FitCrave is being built to remove friction between intention and execution. Because real transformation is operational, not emotional.",
     initials: "PS", photo: ""
   },
   {
     id: 1, name: "Raghuveer Patil", role: "AI ENGINEER",
-    education: "IIT Kharagpur · Dual Degree · Ocean Engineering & AI",
+    education: "IIT Kharagpur Â· Dual Degree Â· Ocean Engineering & AI",
     bio: "A dedicated fitness enthusiast turned engineer. I built FitCrave to bridge the gap between tracking and execution, creating the ultimate system to turn discipline into a lifelong habit.",
     initials: "RP", photo: ""
   },
   {
     id: 2, name: "Sharath S.", role: "AI ENGINEER",
-    education: "IIT Kharagpur · Dual Degree · Electrical & AI",
+    education: "IIT Kharagpur Â· Dual Degree Â· Electrical & AI",
     bio: "Bridging the gap between electrical engineering and advanced AI to create intelligent health systems that adapt to you.",
     initials: "SS", photo: ""
   },
   {
     id: 3, name: "Rachit Gupta", role: "AI ENGINEER",
-    education: "IIT Kharagpur · Dual Degree · Agriculture & Financial Planning",
-    bio: "Combining agricultural insight with financial planning to optimize the most important investment you'll ever make—your health.",
+    education: "IIT Kharagpur Â· Dual Degree Â· Agriculture & Financial Planning",
+    bio: "Combining agricultural insight with financial planning to optimize the most important investment you'll ever makeâ€”your health.",
     initials: "RG", photo: ""
   },
   {
     id: 4, name: "Jay Tandia", role: "UI UX DESIGNER",
-    education: "IIT Kharagpur · Dual Degree · Biotechnology",
+    education: "IIT Kharagpur Â· Dual Degree Â· Biotechnology",
     bio: "Fusing biotechnological knowledge with pixel-perfect design to create an interface that feels as intuitive as it is powerful.",
     initials: "JT", photo: ""
   }
 ];
 
-/* ─── Shared helpers ─── */
+/* â”€â”€â”€ Shared helpers â”€â”€â”€ */
 function Rv({ children, delay, y }) {
   const ref = useRef(null); const [v, setV] = useState(false);
   useEffect(() => { const el = ref.current; if (!el) return; const o = new IntersectionObserver(([e]) => { if (e.isIntersecting) setV(true) }, { threshold: .08 }); o.observe(el); return () => o.disconnect() }, []);
@@ -100,7 +98,7 @@ const I = {
   dl: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>,
 };
 
-/* ─── Shared Storage Helper (GLOBAL = shared:true) ─── */
+/* â”€â”€â”€ Shared Storage Helper (GLOBAL = shared:true) â”€â”€â”€ */
 const DB = {
   async get(key) {
     try { const r = await window.storage.get(key, true); return r ? JSON.parse(r.value) : null; } catch { return null; }
@@ -113,60 +111,7 @@ const DB = {
   }
 };
 
-/* ─── LEGAL PAGES ─── */
-function PrivacyPage({ t, SF, SS, SM, acG, acT, onBack }) {
-  const W = { maxWidth: 800, margin: "0 auto", padding: "0 32px" };
-  const hd = { fontFamily: SF, fontStyle: "italic", fontSize: "1.3rem", marginTop: 40, marginBottom: 14, color: t.tx };
-  const sub = { fontFamily: SS, fontWeight: 700, fontSize: ".95rem", marginTop: 24, marginBottom: 10, color: t.tx };
-  const pg = { fontSize: ".88rem", lineHeight: 1.85, color: t.tx2, marginBottom: 12 };
-  return <div style={{ minHeight: "100vh", background: t.bg, color: t.tx, paddingTop: 100, paddingBottom: 80 }}>
-    <div style={W}>
-      <button onClick={onBack} style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "none", border: `1px solid ${t.bd}`, borderRadius: 10, padding: "8px 18px", cursor: "pointer", color: t.tx2, fontSize: ".8rem", fontWeight: 600, fontFamily: SM, marginBottom: 32 }}>{I.back()} Back to Home</button>
-      <div style={{ marginBottom: 48 }}>
-        <span style={{ fontFamily: SM, fontSize: ".62rem", fontWeight: 700, color: t.ac, letterSpacing: ".14em", textTransform: "uppercase" }}>LEGAL</span>
-        <h1 style={{ fontSize: "clamp(2rem,4vw,3rem)", lineHeight: 1.1, letterSpacing: "-.04em", marginTop: 14 }}>
-          <span style={{ fontFamily: SS, fontWeight: 800 }}>Privacy </span><span style={{ fontFamily: SF, fontStyle: "italic", ...acT }}>Policy</span>
-        </h1>
-        <p style={{ fontFamily: SM, fontSize: ".68rem", color: t.tx3, marginTop: 12 }}>Last updated: March 2026 · FitCrave Pvt. Ltd.</p>
-      </div>
-
-      <p style={pg}>FitCrave Pvt. Ltd. ("FitCrave", "we", "us", "our") is committed to protecting your personal information and your right to privacy. This Privacy Policy describes what information we collect, how we use it, and what rights you have in relation to it. By using FitCrave's services, you agree to the collection and use of information in accordance with this policy.</p>
-
-      <h2 style={hd}>1. Information We Collect</h2>
-      <h3 style={sub}>1.1 Information You Provide</h3>
-      <p style={pg}>When you register for early access, create an account, or use our services, we may collect the following personal information: your email address for account creation, communication, and early access registration; your name for personalization of the FitCrave experience; fitness goals and preferences including but not limited to fat loss, muscle gain, health maintenance, and discipline objectives; and in future releases, health-related inputs such as dietary preferences, meal logs, workout activity, body measurements, and health scores.</p>
-      <h3 style={sub}>1.2 Automatically Collected Information</h3>
-      <p style={pg}>When you interact with our platform, we automatically collect certain information including usage analytics such as pages visited, features used, session duration, and interaction patterns; device information including device type, operating system, browser type, and screen resolution; and approximate location data derived from IP address for service optimization.</p>
-
-      <h2 style={hd}>2. How We Use Your Information</h2>
-      <p style={pg}>We use the information we collect for the following purposes: to provide AI-powered personalization of nutrition plans, workout programming, health scores, and meal recommendations tailored to your goals; for product improvement by analyzing aggregated usage patterns to improve features, fix issues, and develop new capabilities; for communication purposes including sending early access updates, product announcements, health tips, and service-related notifications; and to maintain platform integrity by preventing misuse, enforcing our Terms of Service, and ensuring community safety.</p>
-
-      <h2 style={hd}>3. Data Storage and Security</h2>
-      <p style={pg}>Your data is stored on secure servers with industry-standard protection measures. We implement encryption in transit (TLS/SSL) and at rest for sensitive data. Access to personal data is restricted to authorized personnel only, and we conduct regular security reviews and updates to our infrastructure. While no method of electronic storage is 100% secure, we strive to use commercially acceptable means to protect your personal information.</p>
-
-      <h2 style={hd}>4. Third-Party Services</h2>
-      <p style={pg}>We may employ third-party companies and services to facilitate our platform, including analytics tools such as Google Analytics, Mixpanel, or similar services to understand usage patterns and improve the product; cloud infrastructure providers for secure data storage and processing; and in future releases, payment processors for subscription billing and meal delivery transactions. These third parties have access to your personal information only to perform specific tasks on our behalf and are obligated not to disclose or use it for any other purpose.</p>
-
-      <h2 style={hd}>5. Your Rights</h2>
-      <p style={pg}>You have the following rights regarding your personal data: the right to request deletion of your personal data by contacting us at charan@fitcrave.co; the right to unsubscribe from marketing communications at any time via email unsubscribe links; the right to request access to and a copy of the personal data we hold about you; and the right to request correction of any inaccurate personal data.</p>
-
-      <h2 style={hd}>6. Cookies</h2>
-      <p style={pg}>FitCrave uses cookies and similar tracking technologies to maintain your session, remember your preferences, and analyze platform usage. You can control cookie preferences through your browser settings. Essential cookies required for basic platform functionality cannot be disabled while using our service.</p>
-
-      <h2 style={hd}>7. Disclaimer</h2>
-      <div style={{ background: t.bg2, border: `1px solid ${t.bd}`, borderRadius: 14, padding: "24px 22px", margin: "16px 0 24px" }}>
-        <p style={{ ...pg, fontWeight: 600, color: t.warn, marginBottom: 8 }}>Important Health Disclaimer</p>
-        <p style={pg}>FitCrave is a health and fitness technology platform and does not constitute medical advice. The AI-generated nutrition plans, health scores, workout recommendations, and meal suggestions provided by FitCrave are for informational and educational purposes only. Individual results may vary. Always consult a qualified healthcare professional before making significant changes to your diet, exercise routine, or health regimen, especially if you have pre-existing medical conditions.</p>
-      </div>
-
-      <h2 style={hd}>8. Changes to This Policy</h2>
-      <p style={pg}>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date. You are advised to review this Privacy Policy periodically.</p>
-
-      <h2 style={hd}>9. Contact Us</h2>
-      <p style={pg}>If you have any questions about this Privacy Policy, please contact us at charan@fitcrave.co or write to FitCrave Pvt. Ltd., IIT Kharagpur, West Bengal, India.</p>
-    </div>
-  </div>;
-}
+/* â”€â”€â”€ LEGAL PAGES â”€â”€â”€ */
 
 function TermsPage({ t, SF, SS, SM, acG, acT, onBack }) {
   const W = { maxWidth: 800, margin: "0 auto", padding: "0 32px" };
@@ -181,7 +126,7 @@ function TermsPage({ t, SF, SS, SM, acG, acT, onBack }) {
         <h1 style={{ fontSize: "clamp(2rem,4vw,3rem)", lineHeight: 1.1, letterSpacing: "-.04em", marginTop: 14 }}>
           <span style={{ fontFamily: SS, fontWeight: 800 }}>Terms of </span><span style={{ fontFamily: SF, fontStyle: "italic", ...acT }}>Service</span>
         </h1>
-        <p style={{ fontFamily: SM, fontSize: ".68rem", color: t.tx3, marginTop: 12 }}>Last updated: March 2026 · FitCrave Pvt. Ltd.</p>
+        <p style={{ fontFamily: SM, fontSize: ".68rem", color: t.tx3, marginTop: 12 }}>Last updated: March 2026 Â· FitCrave Pvt. Ltd.</p>
       </div>
 
       <p style={pg}>These Terms of Service ("Terms") govern your use of the FitCrave platform, mobile application, and related services (collectively, the "Service") operated by FitCrave Pvt. Ltd. ("FitCrave", "we", "us", "our"). By accessing or using our Service, you agree to be bound by these Terms.</p>
@@ -199,7 +144,7 @@ function TermsPage({ t, SF, SS, SM, acG, acT, onBack }) {
       <p style={pg}>Subscription payments are generally non-refundable. However, you may request a refund within 7 days of your initial subscription purchase if you have not substantially used premium features during that period. Meal delivery orders may be eligible for a refund or credit if there is a verifiable quality issue, incorrect order fulfillment, or non-delivery. Refund requests should be directed to charan@fitcrave.co with your account details and reason for the request. Each refund request will be reviewed on a case-by-case basis.</p>
 
       <h2 style={hd}>5. Community Guidelines and Acceptable Behaviour</h2>
-      <p style={pg}>FitCrave fosters a supportive, respectful community. By using our community features — including leaderboards, challenges, team competitions, and bet challenges — you agree to conduct yourself respectfully and refrain from harassment, hate speech, bullying, or discriminatory behavior toward other users. You agree not to post misleading, false, or deceptive content related to health claims, fitness results, or challenge participation. You shall not manipulate or exploit challenge mechanics, leaderboard systems, or bet structures through fraudulent activity. You must not impersonate other users, healthcare professionals, or FitCrave staff. Violation of these guidelines may result in temporary suspension or permanent termination of your account.</p>
+      <p style={pg}>FitCrave fosters a supportive, respectful community. By using our community features â€” including leaderboards, challenges, team competitions, and bet challenges â€” you agree to conduct yourself respectfully and refrain from harassment, hate speech, bullying, or discriminatory behavior toward other users. You agree not to post misleading, false, or deceptive content related to health claims, fitness results, or challenge participation. You shall not manipulate or exploit challenge mechanics, leaderboard systems, or bet structures through fraudulent activity. You must not impersonate other users, healthcare professionals, or FitCrave staff. Violation of these guidelines may result in temporary suspension or permanent termination of your account.</p>
 
       <h2 style={hd}>6. Bet Challenges and Monetary Stakes</h2>
       <p style={pg}>FitCrave may offer bet challenge features where users pool monetary stakes tied to fitness goal completion. Participation in bet challenges is entirely voluntary. Stake amounts, challenge rules, proof-of-completion requirements, and payout mechanics will be clearly communicated before participation. FitCrave acts as a facilitator and escrow agent for challenge stakes, not as a gambling operator. Disputes regarding challenge outcomes will be resolved through FitCrave's internal dispute resolution process, which may include AI-verified proof review and manual adjudication.</p>
@@ -231,12 +176,12 @@ function TermsPage({ t, SF, SS, SM, acG, acT, onBack }) {
 }
 
 
-/* ═══════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MAIN APP
-   ═══════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 export default function App() {
-  const [mode, setMode] = useState("dark");
-  const [page, setPage] = useState("home"); // "home" | "privacy" | "terms"
+  const { mode, setMode, t, SF, SS, SM, acG, acT } = useSiteTheme();
+  const [page, setPage] = useState("home"); // "home" | "terms"
   const [scrolled, setScrolled] = useState(false); const [email, setEmail] = useState(""); const [uname, setUname] = useState(""); const [goal, setGoal] = useState(""); const [submitted, setSubmitted] = useState(false); const [loading, setLoading] = useState(false); const [openFaq, setOpenFaq] = useState(null); const [mobNav, setMobNav] = useState(false); const [heroIn, setHeroIn] = useState(false); const [showAdmin, setShowAdmin] = useState(false); const [adminAuth, setAdminAuth] = useState(false); const [adminPwd, setAdminPwd] = useState(""); const [adminTab, setAdminTab] = useState("founder"); const [wlCount, setWlCount] = useState(0); const [wl, setWl] = useState([]); const [team, setTeam] = useState(DEFAULT_TEAM);
   const [founder, setFounder] = useState(DEFAULT_FOUNDER);
   const [cfg, setCfg] = useState(DEFAULT_CONFIG);
@@ -247,16 +192,13 @@ export default function App() {
   const [adminSaveMsg, setAdminSaveMsg] = useState("");
   const pollRef = useRef(null);
 
-  const t = mode === "dark" ? D : L; const SF = "'Instrument Serif',Georgia,serif"; const SS = "'Syne',system-ui,sans-serif"; const SM = "'JetBrains Mono',monospace";
-  const acG = mode === "dark" ? "linear-gradient(135deg,#C4B5FD,#A78BFA 40%,#7C3AED)" : "linear-gradient(135deg,#6D28D9,#7C3AED 40%,#A78BFA)";
-  const acT = { background: acG, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" };
   const acGlow = mode === "dark" ? { filter: "drop-shadow(0 0 24px rgba(167,139,250,.5))" } : { filter: "drop-shadow(0 0 18px rgba(109,40,217,.35))" };
   const W = { maxWidth: 1200, margin: "0 auto", padding: "0 32px" }; const vld = email.includes("@") && email.includes(".");
   const ib = Icon => <div style={{ width: 40, height: 40, borderRadius: 11, background: t.acS, display: "flex", alignItems: "center", justifyContent: "center", color: t.ac, flexShrink: 0 }}><Icon /></div>;
   const inpS = { width: "100%", padding: "14px 16px", borderRadius: 11, border: `1.5px solid ${t.bd}`, background: t.bg, color: t.tx, fontSize: ".9rem", outline: "none", fontFamily: SS };
   const lblS = { fontFamily: SM, fontSize: ".6rem", fontWeight: 700, color: t.tx3, letterSpacing: ".1em", display: "block", marginBottom: 7 };
 
-  /* ─── LOAD ALL GLOBAL DATA ON MOUNT ─── */
+  /* â”€â”€â”€ LOAD ALL GLOBAL DATA ON MOUNT â”€â”€â”€ */
   const loadGlobalData = useCallback(async () => {
     try {
       const [cfgSnap, teamSnap, founderSnap] = await Promise.all([
@@ -317,7 +259,7 @@ export default function App() {
     } catch (e) { console.error("Save WL Error:", e); }
   };
   const go = id => { document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }); setMobNav(false) };
-  const doSubmit = async () => { if (!vld) return; setLoading(true); await saveWl({ email, name: uname || "—", goal: goal || "—" }); setTimeout(() => { setSubmitted(true); setLoading(false) }, 1200) };
+  const doSubmit = async () => { if (!vld) return; setLoading(true); await saveWl({ email, name: uname || "â€”", goal: goal || "â€”" }); setTimeout(() => { setSubmitted(true); setLoading(false) }, 1200) };
   const handlePhoto = cb => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*"; inp.onchange = e => { const f = e.target.files?.[0]; if (!f) return; if (f.size > 500000) { alert("Max 500KB"); return } const r = new FileReader(); r.onload = ev => cb(ev.target.result); r.readAsDataURL(f) }; inp.click() };
   const exportCSV = () => { const csv = "Email,Name,Goal,Date\n" + wl.map(r => `${r.email},${r.name},${r.goal},${r.ts}`).join("\n"); const b = new Blob([csv], { type: "text/csv" }); const u = URL.createObjectURL(b); const a = document.createElement("a"); a.href = u; a.download = "fitcrave-waitlist.csv"; a.click() };
   const flashSave = (msg) => { setAdminSaveMsg(msg || "Saved globally"); setTimeout(() => setAdminSaveMsg(""), 2200) };
@@ -349,20 +291,18 @@ export default function App() {
 
   const navigateTo = (pg) => { setPage(pg); scrollTo({ top: 0 }); };
 
-  /* ─── LEGAL PAGES ROUTING ─── */
-  if (page === "privacy") return <div style={{ fontFamily: SS, background: t.bg, color: t.tx, minHeight: "100vh" }}>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <PrivacyPage t={t} SF={SF} SS={SS} SM={SM} acG={acG} acT={acT} onBack={() => navigateTo("home")} />
-  </div>;
-  if (page === "terms") return <div style={{ fontFamily: SS, background: t.bg, color: t.tx, minHeight: "100vh" }}>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <TermsPage t={t} SF={SF} SS={SS} SM={SM} acG={acG} acT={acT} onBack={() => navigateTo("home")} />
-  </div>;
-
-  /* ─── MAIN HOME PAGE ─── */
   return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="*" element={page === "terms" ? (
+          <div style={{ fontFamily: SS, background: t.bg, color: t.tx, minHeight: "100vh" }}>
+            <link href={FONTS_LINK} rel="stylesheet" />
+            <TermsPage t={t} SF={SF} SS={SS} SM={SM} acG={acG} acT={acT} onBack={() => navigateTo("home")} />
+          </div>
+        ) : (
     <div style={{ fontFamily: SS, background: t.bg, color: t.tx, minHeight: "100vh", overflowX: "hidden" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+      <link href={FONTS_LINK} rel="stylesheet" />
       <style>{`*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}body{overflow-x:hidden}::selection{background:${t.ac}22}input::placeholder{color:${t.tx3}}
 @keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.1)}}
 @keyframes pulse2{0%,100%{opacity:.3}50%{opacity:.9}}
@@ -376,7 +316,7 @@ export default function App() {
 @media(max-width:860px){.dn{display:none!important}.mt{display:flex!important}.hf{flex-direction:column!important;text-align:center!important}.hf>div:first-child{align-items:center!important}.g3{grid-template-columns:1fr!important}.g2{grid-template-columns:1fr!important}.id2x2{grid-template-columns:1fr!important}.hh{font-size:clamp(2.2rem,7.5vw,3rem)!important}.sh{font-size:clamp(1.6rem,5.5vw,2.4rem)!important}.hv{max-width:320px!important;margin:0 auto!important}}
 @media(min-width:861px){.mt{display:none!important}.mm{display:none!important}}`}</style>
 
-      {/* ═══ ADMIN PANEL ═══ */}
+      {/* â•â•â• ADMIN PANEL â•â•â• */}
       {showAdmin && <div style={{ position: "fixed", inset: 0, zIndex: 10000, background: "rgba(0,0,0,.88)", backdropFilter: "blur(20px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setShowAdmin(false)}>
         <div onClick={e => e.stopPropagation()} style={{ background: t.bg3, border: `1px solid ${t.bd}`, borderRadius: 20, padding: 28, maxWidth: 860, width: "100%", maxHeight: "85vh", overflow: "auto" }}>
           {!adminAuth ? <div style={{ textAlign: "center", padding: 40 }}>
@@ -403,13 +343,13 @@ export default function App() {
                 <h3 style={{ fontWeight: 700 }}>Admin Panel</h3>
                 {adminSaveMsg && <span style={{ animation: "fadeSlide .3s", fontFamily: SM, fontSize: ".65rem", color: t.ok, fontWeight: 700, background: t.okB, padding: "4px 12px", borderRadius: 6 }}>{adminSaveMsg}</span>}
               </div>
-              <button onClick={() => setShowAdmin(false)} style={{ background: "none", border: `1px solid ${t.bd}`, borderRadius: 8, width: 36, height: 36, cursor: "pointer", color: t.tx, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+              <button onClick={() => setShowAdmin(false)} style={{ background: "none", border: `1px solid ${t.bd}`, borderRadius: 8, width: 36, height: 36, cursor: "pointer", color: t.tx, display: "flex", alignItems: "center", justifyContent: "center" }}>âœ•</button>
             </div>
             {/* Global status bar */}
             <div style={{ background: launched ? `${t.ok}15` : `${t.ac}10`, border: `1px solid ${launched ? t.ok : t.ac}30`, borderRadius: 12, padding: "14px 18px", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ width: 10, height: 10, borderRadius: "50%", background: launched ? t.ok : t.ac, boxShadow: `0 0 8px ${launched ? t.ok : t.ac}` }} />
-                <span style={{ fontFamily: SM, fontSize: ".72rem", fontWeight: 700, color: launched ? t.ok : t.ac }}>{launched ? "APP LIVE — Download mode active" : "PRE-LAUNCH — Waitlist mode active"}</span>
+                <span style={{ fontFamily: SM, fontSize: ".72rem", fontWeight: 700, color: launched ? t.ok : t.ac }}>{launched ? "APP LIVE â€” Download mode active" : "PRE-LAUNCH â€” Waitlist mode active"}</span>
               </div>
               <span style={{ fontFamily: SM, fontSize: ".62rem", color: t.tx3 }}>All changes save globally for all users</span>
             </div>
@@ -418,7 +358,7 @@ export default function App() {
               {["settings", "founder", "team", "waitlist"].map(tab => <button key={tab} onClick={() => setAdminTab(tab)} style={{ background: adminTab === tab ? t.ac : "transparent", color: adminTab === tab ? "#fff" : t.tx2, border: `1px solid ${adminTab === tab ? t.ac : t.bd}`, borderRadius: 8, padding: "8px 16px", fontSize: ".72rem", fontWeight: 700, cursor: "pointer", fontFamily: SM, textTransform: "capitalize" }}>{tab === "settings" ? "Launch & Config" : tab}{tab === "team" ? ` (${team.length})` : tab === "waitlist" ? ` (${wl.length})` : ""}</button>)}
             </div>
 
-            {/* ─── SETTINGS TAB (EXPANDED) ─── */}
+            {/* â”€â”€â”€ SETTINGS TAB (EXPANDED) â”€â”€â”€ */}
             {adminTab === "settings" && <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
               {/* App Launch Toggle */}
               <div style={{ background: t.bg2, borderRadius: 14, padding: 22, border: `1px solid ${t.bd}` }}>
@@ -427,7 +367,7 @@ export default function App() {
                   <div onClick={() => saveCfg({ appLaunched: !cfg.appLaunched })} style={{ width: 48, height: 26, borderRadius: 13, background: launched ? t.ok : t.bd, position: "relative", cursor: "pointer", transition: "background .3s" }}><div style={{ width: 20, height: 20, borderRadius: "50%", background: "#fff", position: "absolute", top: 3, left: launched ? 25 : 3, transition: "left .3s" }} /></div>
                   <span style={{ fontSize: ".85rem", fontWeight: 700, color: launched ? t.ok : t.tx2 }}>{launched ? "LIVE" : "Off"}</span>
                 </div>
-                <p style={{ fontSize: ".7rem", color: t.tx3, fontFamily: SM, lineHeight: 1.6 }}>When enabled: "Join Waitlist" → "Download Now" · Hero updates to launch messaging · Store buttons appear · Waitlist section hides</p>
+                <p style={{ fontSize: ".7rem", color: t.tx3, fontFamily: SM, lineHeight: 1.6 }}>When enabled: "Join Waitlist" â†’ "Download Now" Â· Hero updates to launch messaging Â· Store buttons appear Â· Waitlist section hides</p>
               </div>
 
               {/* Waitlist Toggle */}
@@ -463,7 +403,7 @@ export default function App() {
               </div>
             </div>}
 
-            {/* ─── FOUNDER TAB ─── */}
+            {/* â”€â”€â”€ FOUNDER TAB â”€â”€â”€ */}
             {adminTab === "founder" && <div style={{ background: t.bg2, borderRadius: 12, padding: 20, border: `1px solid ${t.bd}` }}>
               <h4 style={{ fontSize: ".82rem", fontWeight: 700, marginBottom: 14 }}>Edit Founder Profile</h4>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
@@ -478,7 +418,7 @@ export default function App() {
               <button onClick={async () => { try { await setDoc(doc(db, "website", "founder"), founder); flashSave("Founder saved globally") } catch (e) { } }} style={{ background: t.ac, color: "#fff", border: "none", borderRadius: 8, padding: "8px 20px", fontSize: ".75rem", fontWeight: 700, cursor: "pointer", fontFamily: SM }}>Save Founder</button>
             </div>}
 
-            {/* ─── TEAM TAB ─── */}
+            {/* â”€â”€â”€ TEAM TAB â”€â”€â”€ */}
             {adminTab === "team" && <div>
               <div style={{ background: t.bg2, borderRadius: 12, padding: 20, border: `1px solid ${t.bd}`, marginBottom: 16 }}>
                 <h4 style={{ fontSize: ".82rem", fontWeight: 700, marginBottom: 14 }}>{editIdx !== null ? "Edit" : "Add"} Team Member</h4>
@@ -501,7 +441,7 @@ export default function App() {
               </div>)}
             </div>}
 
-            {/* ─── WAITLIST TAB ─── */}
+            {/* â”€â”€â”€ WAITLIST TAB â”€â”€â”€ */}
             {adminTab === "waitlist" && <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
                 <p style={{ fontFamily: SM, fontSize: ".72rem", color: t.tx3 }}>{wl.length} signups total</p>
@@ -532,14 +472,14 @@ export default function App() {
           </div>
           <div className="dn" style={{ display: "flex", alignItems: "center", gap: 34 }}>
             {navItems.map(n => <a key={n.id} className="na" onClick={() => go(n.id)}>{n.l}</a>)}
-            <button onClick={() => setMode(m => m === "dark" ? "light" : "dark")} style={{ background: "none", border: `1.5px solid ${t.bd}`, borderRadius: 9, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: t.tx2, fontSize: ".95rem" }}>{mode === "dark" ? "☀" : "☾"}</button>
+            <button onClick={() => setMode(m => m === "dark" ? "light" : "dark")} style={{ background: "none", border: `1.5px solid ${t.bd}`, borderRadius: 9, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: t.tx2, fontSize: ".95rem" }}>{mode === "dark" ? "â˜€" : "â˜¾"}</button>
             <button className="mb" onClick={heroCTA.action} style={{ background: acG, color: "#fff", border: "none", borderRadius: 9, padding: "9px 22px", fontSize: ".8rem", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
               {launched && I.dl()}{launched ? "Download" : "Early Access"}
             </button>
           </div>
           <div className="mt" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <button onClick={() => setMode(m => m === "dark" ? "light" : "dark")} style={{ background: "none", border: "none", color: t.tx2, cursor: "pointer", fontSize: "1rem" }}>{mode === "dark" ? "☀" : "☾"}</button>
-            <button onClick={() => setMobNav(!mobNav)} style={{ background: "none", border: `1.5px solid ${t.bd}`, borderRadius: 8, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: t.tx }}>{mobNav ? "✕" : "☰"}</button>
+            <button onClick={() => setMode(m => m === "dark" ? "light" : "dark")} style={{ background: "none", border: "none", color: t.tx2, cursor: "pointer", fontSize: "1rem" }}>{mode === "dark" ? "â˜€" : "â˜¾"}</button>
+            <button onClick={() => setMobNav(!mobNav)} style={{ background: "none", border: `1.5px solid ${t.bd}`, borderRadius: 8, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: t.tx }}>{mobNav ? "âœ•" : "â˜°"}</button>
           </div></div>
         {mobNav && <div className="mm" style={{ background: t.gls, backdropFilter: "blur(24px)", padding: "12px 32px 24px", borderTop: `1px solid ${t.bd}` }}>
           {navItems.map(n => <a key={n.id} onClick={() => go(n.id)} style={{ display: "block", padding: "14px 0", color: t.tx2, fontSize: ".9rem", fontWeight: 600, cursor: "pointer", borderBottom: `1px solid ${t.bd}` }}>{n.l}</a>)}
@@ -554,7 +494,7 @@ export default function App() {
         {particles.map((p, i) => <div key={i} style={{ position: "absolute", left: p.left, top: p.top, width: p.size, height: p.size, borderRadius: "50%", background: t.ac, opacity: p.opacity, animation: `float ${p.dur}s ease-in-out ${p.delay}s infinite`, pointerEvents: "none" }} />)}
         <div style={{ ...W, position: "relative", zIndex: 2, width: "100%" }}><div className="hf" style={{ display: "flex", gap: 56, alignItems: "center" }}>
           <div style={{ flex: "1 1 55%", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 28 }}>
-            <div style={{ opacity: heroIn ? 1 : 0, transform: heroIn ? "none" : "translateY(20px)", transition: "all .7s .2s", display: "inline-flex", alignItems: "center", gap: 8, border: `1px solid ${t.ac}25`, borderRadius: 100, padding: "7px 18px 7px 12px", background: `${t.ac}08` }}><span style={{ width: 6, height: 6, borderRadius: "50%", background: launched ? t.ok : "#FBBF24", boxShadow: `0 0 8px ${launched ? t.ok : "#FBBF24"}`, animation: "pulse2 2s ease infinite" }} /><span style={{ fontSize: ".7rem", fontWeight: 700, color: t.ac, fontFamily: SM, letterSpacing: ".06em", textTransform: "uppercase" }}>{launched ? "Now Live — Download the App" : "Early Access"}{!launched && wlCount > 0 ? ` · ${wlCount}+ joined` : ""}</span></div>
+            <div style={{ opacity: heroIn ? 1 : 0, transform: heroIn ? "none" : "translateY(20px)", transition: "all .7s .2s", display: "inline-flex", alignItems: "center", gap: 8, border: `1px solid ${t.ac}25`, borderRadius: 100, padding: "7px 18px 7px 12px", background: `${t.ac}08` }}><span style={{ width: 6, height: 6, borderRadius: "50%", background: launched ? t.ok : "#FBBF24", boxShadow: `0 0 8px ${launched ? t.ok : "#FBBF24"}`, animation: "pulse2 2s ease infinite" }} /><span style={{ fontSize: ".7rem", fontWeight: 700, color: t.ac, fontFamily: SM, letterSpacing: ".06em", textTransform: "uppercase" }}>{launched ? "Now Live â€” Download the App" : "Early Access"}{!launched && wlCount > 0 ? ` Â· ${wlCount}+ joined` : ""}</span></div>
             <h1 className="hh" style={{ opacity: heroIn ? 1 : 0, transform: heroIn ? "none" : "translateY(40px)", transition: "all .9s .35s", fontSize: "clamp(2.8rem,4.8vw,4.5rem)", lineHeight: 1.04, letterSpacing: "-.045em" }}>
               {launched
                 ? <><span style={{ fontFamily: SS, fontWeight: 800 }}>FitCrave is </span><span key={"ht" + mode} style={{ fontFamily: SF, fontStyle: "italic", ...acT, ...acGlow, display: "inline-block" }}>here.</span><br /><span style={{ fontFamily: SS, fontWeight: 800 }}>Transform </span><span key={"ht2" + mode} style={{ fontFamily: SF, fontStyle: "italic", ...acT, ...acGlow, display: "inline-block" }}>now.</span></>
@@ -563,7 +503,7 @@ export default function App() {
             </h1>
             <p style={{ opacity: heroIn ? 1 : 0, transform: heroIn ? "none" : "translateY(24px)", transition: "all .8s .5s", fontSize: "1.08rem", lineHeight: 1.75, color: t.tx2, maxWidth: 480 }}>
               {launched
-                ? <>Download FitCrave — AI plans your nutrition, programs workouts, scores your health, and <em style={{ fontFamily: SF, color: t.tx, fontStyle: "italic" }}>delivers macro-perfect meals to your door</em>.</>
+                ? <>Download FitCrave â€” AI plans your nutrition, programs workouts, scores your health, and <em style={{ fontFamily: SF, color: t.tx, fontStyle: "italic" }}>delivers macro-perfect meals to your door</em>.</>
                 : <>AI plans your nutrition. Programs your workouts. Scores your health. And <em style={{ fontFamily: SF, color: t.tx, fontStyle: "italic" }}>delivers macro-perfect meals to your door</em>.</>
               }
             </p>
@@ -594,9 +534,9 @@ export default function App() {
       <div style={{ overflow: "hidden", padding: "18px 0", borderBottom: `1px solid ${t.bd}`, background: t.bg }}>
         <div style={{ display: "flex", width: "max-content", animation: "mTick 60s linear infinite" }}>
           {[...Array(2)].map((_, rep) => <div key={rep} style={{ display: "flex", alignItems: "center", whiteSpace: "nowrap" }}>
-            {["AI-Powered Nutrition", "Macro-Perfect Meal Delivery", "9-Dimension Health Score", "Dark Kitchen Network", "MealSnap Food Recognition", "Menu Intelligence (Mess + Restaurant)", "Dynamic Workout Programming", "Bet Challenges with Real Stakes", "National Leaderboard System", "Identity Transformation Engine", "Auto-Logged Delivery", "₹299/mo Pro Plan", "Community Challenges", "Team vs Team Battles"].map((item, i) => <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 20, paddingRight: 20 }}>
+            {["AI-Powered Nutrition", "Macro-Perfect Meal Delivery", "9-Dimension Health Score", "Dark Kitchen Network", "MealSnap Food Recognition", "Menu Intelligence (Mess + Restaurant)", "Dynamic Workout Programming", "Bet Challenges with Real Stakes", "National Leaderboard System", "Identity Transformation Engine", "Auto-Logged Delivery", "â‚¹299/mo Pro Plan", "Community Challenges", "Team vs Team Battles"].map((item, i) => <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 20, paddingRight: 20 }}>
               <span style={{ fontFamily: SM, fontSize: ".68rem", fontWeight: 600, color: t.ac, letterSpacing: ".04em" }}>{item}</span>
-              <span style={{ color: t.tx3, fontSize: ".5rem" }}>◆</span>
+              <span style={{ color: t.tx3, fontSize: ".5rem" }}>â—†</span>
             </span>)}
           </div>)}
         </div>
@@ -604,11 +544,11 @@ export default function App() {
 
       {/* PROBLEM */}
       <section id="problem" style={{ padding: "120px 0" }}><div style={W}><Rv><div style={{ maxWidth: 680, marginBottom: 60 }}><span style={{ fontFamily: SM, fontSize: ".66rem", fontWeight: 700, color: t.ac, letterSpacing: ".14em", textTransform: "uppercase" }}>( 01 ) The Problem</span><h2 className="sh" style={{ fontSize: "clamp(2rem,4vw,3rem)", lineHeight: 1.08, letterSpacing: "-.04em", marginTop: 20 }}><span style={{ fontFamily: SS, fontWeight: 800 }}>Fitness sells </span><span key={"p1" + mode} style={{ fontFamily: SF, fontStyle: "italic", ...acT }}>information.</span><br /><span style={{ fontFamily: SS, fontWeight: 800 }}>You need </span><span key={"p2" + mode} style={{ fontFamily: SF, fontStyle: "italic", ...acT }}>execution.</span></h2></div></Rv>
-        <div className="g3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 }}>{[{ n: "01", Ic: I.sc, tt: "Manual Tracking Fails", d: "73% abandon trackers in 2 weeks.", w: "MyFitnessPal" }, { n: "02", Ic: I.tg, tt: "Plans Without Execution", d: "Plans nobody follows. Knowing ≠ doing.", w: "Diet Plans" }, { n: "03", Ic: I.fk, tt: "Unhealthy by Default", d: "Delivery apps optimize for cravings.", w: "Swiggy/Zomato" }, { n: "04", Ic: I.us, tt: "Coaching Doesn't Scale", d: "₹10K+/month. 540M+ priced out.", w: "Trainers" }, { n: "05", Ic: I.zp, tt: "Trackers, Not Engines", d: "Records past. Never decides future.", w: "All Apps" }, { n: "06", Ic: I.sh, tt: "India Gets Ignored", d: "Global apps miss Indian food.", w: "Western Apps" }].map((p, i) => <Rv key={i} delay={i * .05}><Tilt glow={`${t.ac}08`} style={{ background: t.bg3, border: `1px solid ${t.bd}`, borderRadius: 16, padding: "28px 22px", height: "100%" }}><div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14 }}><span style={{ fontFamily: SM, fontSize: "1.8rem", fontWeight: 700, color: `${t.ac}20` }}>{p.n}</span>{ib(p.Ic)}</div><h4 style={{ fontSize: ".95rem", fontWeight: 700, marginBottom: 8 }}>{p.tt}</h4><p style={{ fontSize: ".82rem", color: t.tx2, lineHeight: 1.65 }}>{p.d}</p><div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${t.bd}`, fontSize: ".6rem", fontFamily: SM, color: t.tx3 }}>FAILS → {p.w}</div></Tilt></Rv>)}</div></div></section>
+        <div className="g3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 }}>{[{ n: "01", Ic: I.sc, tt: "Manual Tracking Fails", d: "73% abandon trackers in 2 weeks.", w: "MyFitnessPal" }, { n: "02", Ic: I.tg, tt: "Plans Without Execution", d: "Plans nobody follows. Knowing â‰  doing.", w: "Diet Plans" }, { n: "03", Ic: I.fk, tt: "Unhealthy by Default", d: "Delivery apps optimize for cravings.", w: "Swiggy/Zomato" }, { n: "04", Ic: I.us, tt: "Coaching Doesn't Scale", d: "â‚¹10K+/month. 540M+ priced out.", w: "Trainers" }, { n: "05", Ic: I.zp, tt: "Trackers, Not Engines", d: "Records past. Never decides future.", w: "All Apps" }, { n: "06", Ic: I.sh, tt: "India Gets Ignored", d: "Global apps miss Indian food.", w: "Western Apps" }].map((p, i) => <Rv key={i} delay={i * .05}><Tilt glow={`${t.ac}08`} style={{ background: t.bg3, border: `1px solid ${t.bd}`, borderRadius: 16, padding: "28px 22px", height: "100%" }}><div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14 }}><span style={{ fontFamily: SM, fontSize: "1.8rem", fontWeight: 700, color: `${t.ac}20` }}>{p.n}</span>{ib(p.Ic)}</div><h4 style={{ fontSize: ".95rem", fontWeight: 700, marginBottom: 8 }}>{p.tt}</h4><p style={{ fontSize: ".82rem", color: t.tx2, lineHeight: 1.65 }}>{p.d}</p><div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${t.bd}`, fontSize: ".6rem", fontFamily: SM, color: t.tx3 }}>FAILS â†’ {p.w}</div></Tilt></Rv>)}</div></div></section>
 
       {/* SOLUTION */}
       <section id="solution" style={{ padding: "120px 0", background: t.bg2 }}><div style={W}><Rv><div style={{ maxWidth: 680, marginBottom: 60 }}><span style={{ fontFamily: SM, fontSize: ".66rem", fontWeight: 700, color: t.ac, letterSpacing: ".14em", textTransform: "uppercase" }}>( 02 ) The System</span><h2 className="sh" style={{ fontSize: "clamp(2rem,4vw,3rem)", lineHeight: 1.08, letterSpacing: "-.04em", marginTop: 20 }}><span style={{ fontFamily: SS, fontWeight: 800 }}>Two layers. </span><span key={"s1" + mode} style={{ fontFamily: SF, fontStyle: "italic", ...acT }}>One closed loop.</span></h2></div></Rv>
-        <div className="g2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>{[{ label: "SERVICE LAYER", Ic: I.br, title: "AI Health Intelligence", items: ["Personalized macro & meal plans", "AI food recognition", "Dynamic workout programming", "9-dimension health score", "Menu AI (mess/canteen/restaurant)", "Behavioral nudges"] }, { label: "MANUFACTURING LAYER", Ic: I.fk, title: "Food Infrastructure", items: ["Macro-standardized meals", "Dark kitchen network", "One-tap ordering", "Auto-logged on delivery", "₹139/meal, 20g+ protein", "Partner → owned scale"] }].map((l, li) => <Rv key={li} delay={li * .1}><div style={{ background: t.bg3, border: `1px solid ${t.bd}`, borderRadius: 20, padding: "36px 28px", height: "100%" }}>{ib(l.Ic)}<span style={{ fontFamily: SM, fontSize: ".58rem", fontWeight: 700, color: t.ac, letterSpacing: ".14em", display: "block", margin: "14px 0 10px" }}>{l.label}</span><h3 style={{ fontFamily: SF, fontSize: "1.45rem", fontStyle: "italic", lineHeight: 1.25, marginBottom: 20 }}>{l.title}</h3>{l.items.map((item, ii) => <div key={ii} style={{ display: "flex", gap: 9, marginBottom: 11 }}><span style={{ color: t.ac, fontSize: ".65rem", flexShrink: 0 }}>▸</span><span style={{ fontSize: ".83rem", color: t.tx2, lineHeight: 1.6 }}>{item}</span></div>)}</div></Rv>)}</div></div></section>
+        <div className="g2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>{[{ label: "SERVICE LAYER", Ic: I.br, title: "AI Health Intelligence", items: ["Personalized macro & meal plans", "AI food recognition", "Dynamic workout programming", "9-dimension health score", "Menu AI (mess/canteen/restaurant)", "Behavioral nudges"] }, { label: "MANUFACTURING LAYER", Ic: I.fk, title: "Food Infrastructure", items: ["Macro-standardized meals", "Dark kitchen network", "One-tap ordering", "Auto-logged on delivery", "â‚¹139/meal, 20g+ protein", "Partner â†’ owned scale"] }].map((l, li) => <Rv key={li} delay={li * .1}><div style={{ background: t.bg3, border: `1px solid ${t.bd}`, borderRadius: 20, padding: "36px 28px", height: "100%" }}>{ib(l.Ic)}<span style={{ fontFamily: SM, fontSize: ".58rem", fontWeight: 700, color: t.ac, letterSpacing: ".14em", display: "block", margin: "14px 0 10px" }}>{l.label}</span><h3 style={{ fontFamily: SF, fontSize: "1.45rem", fontStyle: "italic", lineHeight: 1.25, marginBottom: 20 }}>{l.title}</h3>{l.items.map((item, ii) => <div key={ii} style={{ display: "flex", gap: 9, marginBottom: 11 }}><span style={{ color: t.ac, fontSize: ".65rem", flexShrink: 0 }}>â–¸</span><span style={{ fontSize: ".83rem", color: t.tx2, lineHeight: 1.6 }}>{item}</span></div>)}</div></Rv>)}</div></div></section>
 
       {/* HOW IT WORKS */}
       <section id="how" style={{ padding: "120px 0" }}><div style={W}><Rv><div style={{ maxWidth: 580, marginBottom: 60 }}><span style={{ fontFamily: SM, fontSize: ".66rem", fontWeight: 700, color: t.ac, letterSpacing: ".14em", textTransform: "uppercase" }}>( 03 ) How It Works</span><h2 className="sh" style={{ fontSize: "clamp(2rem,4vw,3rem)", lineHeight: 1.08, letterSpacing: "-.04em", marginTop: 20 }}><span style={{ fontFamily: SS, fontWeight: 800 }}>Six steps. </span><span key={"h1" + mode} style={{ fontFamily: SF, fontStyle: "italic", ...acT }}>One transformed life.</span></h2></div></Rv>
@@ -621,7 +561,7 @@ export default function App() {
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>{ib(I.tr)}<h3 style={{ fontSize: ".95rem", fontWeight: 700 }}>The Identity Shift</h3></div>
           <div style={{ height: 4, borderRadius: 2, background: `linear-gradient(90deg,${t.tx3},${t.warn},${t.ac},${t.ok})`, marginBottom: 20 }} />
           <div className="id2x2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            {[{ week: "Week 1", title: "Explorer", desc: "Trying the app. Features drive curiosity.", color: t.tx3 }, { week: "Week 2–3", title: "Tracker", desc: "Streaks begin. Score becomes personal.", color: t.warn }, { week: "Month 1–2", title: "Consistent", desc: "Leaderboard rank matters. Streak is sacred.", color: t.ac }, { week: "Month 3+", title: "Identity", desc: "FitCrave is a trait, not a tool.", color: t.ok }].map((s, i) => <div key={i} style={{ background: t.bg2, borderRadius: 12, padding: "20px 18px", border: `1px solid ${t.bd}`, borderTop: `3px solid ${s.color}` }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}><span style={{ fontFamily: SM, fontSize: ".55rem", fontWeight: 700, color: s.color }}>{s.week.toUpperCase()}</span><div style={{ width: 10, height: 10, borderRadius: "50%", background: s.color }} /></div><h4 style={{ fontFamily: SF, fontStyle: "italic", fontSize: "1rem", marginBottom: 6 }}>{s.title}</h4><p style={{ fontSize: ".75rem", color: t.tx2, lineHeight: 1.5 }}>{s.desc}</p></div>)}</div></div></Rv>
+            {[{ week: "Week 1", title: "Explorer", desc: "Trying the app. Features drive curiosity.", color: t.tx3 }, { week: "Week 2â€“3", title: "Tracker", desc: "Streaks begin. Score becomes personal.", color: t.warn }, { week: "Month 1â€“2", title: "Consistent", desc: "Leaderboard rank matters. Streak is sacred.", color: t.ac }, { week: "Month 3+", title: "Identity", desc: "FitCrave is a trait, not a tool.", color: t.ok }].map((s, i) => <div key={i} style={{ background: t.bg2, borderRadius: 12, padding: "20px 18px", border: `1px solid ${t.bd}`, borderTop: `3px solid ${s.color}` }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}><span style={{ fontFamily: SM, fontSize: ".55rem", fontWeight: 700, color: s.color }}>{s.week.toUpperCase()}</span><div style={{ width: 10, height: 10, borderRadius: "50%", background: s.color }} /></div><h4 style={{ fontFamily: SF, fontStyle: "italic", fontSize: "1rem", marginBottom: 6 }}>{s.title}</h4><p style={{ fontSize: ".75rem", color: t.tx2, lineHeight: 1.5 }}>{s.desc}</p></div>)}</div></div></Rv>
         <div className="g3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 }}>
           {[{ Ic: I.trophy, title: "Bet Challenges", desc: "Pool money. Hit goal or lose stake.", tag: "STAKES" }, { Ic: I.flame, title: "Transformation Battles", desc: "30/60-day competitions. Public leaderboard.", tag: "LONG-TERM" }, { Ic: I.us, title: "Team vs Team", desc: "Hostel vs hostel. IIT KGP vs IIT Bombay.", tag: "TEAMS" }].map((ch, i) => <Rv key={i} delay={i * .06}><Tilt glow={`${t.ac}06`} style={{ background: t.bg3, border: `1px solid ${t.bd}`, borderRadius: 16, padding: "28px 22px", height: "100%" }}><div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14 }}>{ib(ch.Ic)}<span style={{ fontFamily: SM, fontSize: ".52rem", fontWeight: 700, color: t.ac, background: t.acS, padding: "3px 10px", borderRadius: 5 }}>{ch.tag}</span></div><h4 style={{ fontFamily: SF, fontStyle: "italic", fontSize: "1.05rem", marginBottom: 8 }}>{ch.title}</h4><p style={{ fontSize: ".8rem", color: t.tx2, lineHeight: 1.65 }}>{ch.desc}</p></Tilt></Rv>)}
         </div></div></section>
@@ -637,11 +577,11 @@ export default function App() {
       {/* FAQ */}
       <section id="faq" style={{ padding: "100px 0", background: t.bg2 }}><div style={{ ...W, maxWidth: 720 }}>
         <Rv><div style={{ marginBottom: 48 }}><span style={{ fontFamily: SM, fontSize: ".66rem", fontWeight: 700, color: t.ac, letterSpacing: ".14em", textTransform: "uppercase" }}>( 06 ) FAQ</span><h2 className="sh" style={{ fontSize: "clamp(1.8rem,3.5vw,2.4rem)", lineHeight: 1.12, letterSpacing: "-.03em", marginTop: 20 }}><span style={{ fontFamily: SF, fontStyle: "italic" }}>Questions.</span> <span style={{ fontFamily: SS, fontWeight: 800 }}>Answers.</span></h2></div></Rv>
-        <Rv delay={.1}><div>{[{ q: "What is FitCrave?", a: "AI health execution system. Nutrition, workouts, 9D scoring, meal delivery, community — all integrated." }, { q: "Different from HealthifyMe?", a: "They record. We decide, deliver, and compete. Closed loop nobody else has." }, { q: "Deliver meals?", a: "Yes. Dark kitchens, AI-designed meals, auto-logged." }, { q: "Menu intelligence?", a: "Reads mess, canteen, restaurant menus. Tells you what to eat." }, { q: "Bet challenges?", a: "Pool money. Hit goal = split pot. Miss = lose stake." }, { q: "Who is this for?", a: "Students, professionals, gym-goers. Campus-first, expanding nationally." }, { q: "Price?", a: "₹299/month. Founding members get lifetime pricing." }].map((f, i) => <div key={i} onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ padding: "18px 0", borderBottom: `1px solid ${t.bd}`, cursor: "pointer" }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}><h4 style={{ fontSize: ".9rem", fontWeight: 600 }}>{f.q}</h4><span style={{ width: 26, height: 26, borderRadius: 7, flexShrink: 0, border: `1.5px solid ${openFaq === i ? t.ac : t.bd}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".8rem", color: openFaq === i ? t.ac : t.tx3, transition: "all .3s", transform: openFaq === i ? "rotate(45deg)" : "none" }}>+</span></div><div style={{ maxHeight: openFaq === i ? 220 : 0, overflow: "hidden", transition: "max-height .5s cubic-bezier(.16,1,.3,1)" }}><p style={{ fontSize: ".82rem", color: t.tx2, lineHeight: 1.7, paddingTop: 12, paddingRight: 40 }}>{f.a}</p></div></div>)}</div></Rv></div></section>
+        <Rv delay={.1}><div>{[{ q: "What is FitCrave?", a: "AI health execution system. Nutrition, workouts, 9D scoring, meal delivery, community â€” all integrated." }, { q: "Different from HealthifyMe?", a: "They record. We decide, deliver, and compete. Closed loop nobody else has." }, { q: "Deliver meals?", a: "Yes. Dark kitchens, AI-designed meals, auto-logged." }, { q: "Menu intelligence?", a: "Reads mess, canteen, restaurant menus. Tells you what to eat." }, { q: "Bet challenges?", a: "Pool money. Hit goal = split pot. Miss = lose stake." }, { q: "Who is this for?", a: "Students, professionals, gym-goers. Campus-first, expanding nationally." }, { q: "Price?", a: "â‚¹299/month. Founding members get lifetime pricing." }].map((f, i) => <div key={i} onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ padding: "18px 0", borderBottom: `1px solid ${t.bd}`, cursor: "pointer" }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}><h4 style={{ fontSize: ".9rem", fontWeight: 600 }}>{f.q}</h4><span style={{ width: 26, height: 26, borderRadius: 7, flexShrink: 0, border: `1.5px solid ${openFaq === i ? t.ac : t.bd}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".8rem", color: openFaq === i ? t.ac : t.tx3, transition: "all .3s", transform: openFaq === i ? "rotate(45deg)" : "none" }}>+</span></div><div style={{ maxHeight: openFaq === i ? 220 : 0, overflow: "hidden", transition: "max-height .5s cubic-bezier(.16,1,.3,1)" }}><p style={{ fontSize: ".82rem", color: t.tx2, lineHeight: 1.7, paddingTop: 12, paddingRight: 40 }}>{f.a}</p></div></div>)}</div></Rv></div></section>
 
       {/* WAITLIST / DOWNLOAD SECTION */}
       {launched ? (
-        /* ─── LAUNCHED: Download CTA section ─── */
+        /* â”€â”€â”€ LAUNCHED: Download CTA section â”€â”€â”€ */
         <section id="waitlist" style={{ padding: "120px 0", position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: "40%", left: "45%", width: 400, height: 400, borderRadius: "50%", background: `${t.ac}08`, filter: "blur(120px)", pointerEvents: "none" }} />
           <div style={{ ...W, maxWidth: 600, position: "relative" }}><Rv><div style={{ textAlign: "center" }}>
@@ -655,9 +595,9 @@ export default function App() {
           </div></Rv></div>
         </section>
       ) : wlEnabled ? (
-        /* ─── PRE-LAUNCH: Waitlist form ─── */
+        /* â”€â”€â”€ PRE-LAUNCH: Waitlist form â”€â”€â”€ */
         <section id="waitlist" style={{ padding: "120px 0", position: "relative", overflow: "hidden" }}><div style={{ position: "absolute", top: "40%", left: "45%", width: 400, height: 400, borderRadius: "50%", background: `${t.ac}08`, filter: "blur(120px)", pointerEvents: "none" }} />
-          <div style={{ ...W, maxWidth: 600, position: "relative" }}><Rv><div style={{ textAlign: "center", marginBottom: 44 }}><h2 className="sh" style={{ fontSize: "clamp(2rem,4.5vw,3rem)", lineHeight: 1.08, letterSpacing: "-.04em" }}><span style={{ fontFamily: SS, fontWeight: 800 }}>Be first.</span><br /><span key={"c1" + mode} style={{ fontFamily: SF, fontStyle: "italic", ...acT }}>Transform first.</span></h2><p style={{ fontSize: ".93rem", color: t.tx2, lineHeight: 1.75, marginTop: 14 }}><strong style={{ color: t.tx }}>Lifetime pricing</strong> for founding members.</p>{wlCount > 0 && <p style={{ fontFamily: SM, fontSize: ".68rem", color: t.ac, fontWeight: 600, marginTop: 10 }}>{wlCount}+ joined · Limited spots</p>}</div></Rv>
+          <div style={{ ...W, maxWidth: 600, position: "relative" }}><Rv><div style={{ textAlign: "center", marginBottom: 44 }}><h2 className="sh" style={{ fontSize: "clamp(2rem,4.5vw,3rem)", lineHeight: 1.08, letterSpacing: "-.04em" }}><span style={{ fontFamily: SS, fontWeight: 800 }}>Be first.</span><br /><span key={"c1" + mode} style={{ fontFamily: SF, fontStyle: "italic", ...acT }}>Transform first.</span></h2><p style={{ fontSize: ".93rem", color: t.tx2, lineHeight: 1.75, marginTop: 14 }}><strong style={{ color: t.tx }}>Lifetime pricing</strong> for founding members.</p>{wlCount > 0 && <p style={{ fontFamily: SM, fontSize: ".68rem", color: t.ac, fontWeight: 600, marginTop: 10 }}>{wlCount}+ joined Â· Limited spots</p>}</div></Rv>
             <Rv delay={.12}>{!submitted ? <div style={{ background: t.bg3, border: `1px solid ${t.bd}`, borderRadius: 20, padding: "36px 30px", boxShadow: t.sh2 }}>
               <div style={{ marginBottom: 16 }}><label style={lblS}>EMAIL *</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" style={inpS} /></div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}><div><label style={lblS}>NAME</label><input type="text" value={uname} onChange={e => setUname(e.target.value)} placeholder="Your name" style={inpS} /></div><div><label style={lblS}>GOAL</label><select value={goal} onChange={e => setGoal(e.target.value)} style={{ ...inpS, color: goal ? t.tx : t.tx3, cursor: "pointer" }}><option value="">Select goal</option><option value="Fat Loss">Fat Loss</option><option value="Muscle Gain">Muscle Gain</option><option value="Stay Healthy">Stay Healthy</option><option value="Build Discipline">Build Discipline</option></select></div></div>
@@ -670,12 +610,16 @@ export default function App() {
         <div><div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}><div style={{ width: 26, height: 26, borderRadius: 7, background: acG, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="15" height="15" viewBox="0 0 32 32" fill="none"><path d="M4 20 L9 20 L12 12 L15 24 L18 8 L21 18 L24 14 L28 14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /><path d="M25 11 L28 14 L25 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></div><span style={{ fontFamily: SF, fontSize: "1.05rem" }}>Fit<span style={{ fontStyle: "italic" }}>Crave</span></span></div><p style={{ fontFamily: SM, fontSize: ".6rem", color: t.tx3, marginBottom: 4 }}>India's first AI health execution system.</p><p style={{ fontFamily: SM, fontSize: ".55rem", color: t.tx3 }}>charan@fitcrave.co</p></div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
           <div style={{ display: "flex", gap: 16 }}>
-            <a onClick={() => navigateTo("privacy")} style={{ fontFamily: SM, fontSize: ".62rem", color: t.tx3, cursor: "pointer", textDecoration: "none", transition: "color .2s" }} onMouseOver={e => e.target.style.color = t.ac} onMouseOut={e => e.target.style.color = t.tx3}>Privacy Policy</a>
+            <Link to="/privacy" style={{ fontFamily: SM, fontSize: ".62rem", color: t.tx3, cursor: "pointer", textDecoration: "none", transition: "color .2s" }} onMouseOver={e => e.target.style.color = t.ac} onMouseOut={e => e.target.style.color = t.tx3}>Privacy Policy</Link>
             <a onClick={() => navigateTo("terms")} style={{ fontFamily: SM, fontSize: ".62rem", color: t.tx3, cursor: "pointer", textDecoration: "none", transition: "color .2s" }} onMouseOver={e => e.target.style.color = t.ac} onMouseOut={e => e.target.style.color = t.tx3}>Terms of Service</a>
           </div>
-          <p style={{ fontFamily: SM, fontSize: ".6rem", color: t.tx3 }}>© {new Date().getFullYear()} FitCrave Pvt. Ltd.</p>
+          <p style={{ fontFamily: SM, fontSize: ".6rem", color: t.tx3 }}>Â© {new Date().getFullYear()} FitCrave Pvt. Ltd.</p>
           <p style={{ fontFamily: SM, fontSize: ".55rem", color: t.tx3 }}>Built at IIT Kharagpur, India</p>
         </div>
       </div></footer>
-    </div>)
+    </div>
+        )} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
