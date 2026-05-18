@@ -81,7 +81,11 @@ export default function PrivacyPolicy() {
 
           <h2 style={hd}>5. Your Rights</h2>
           <p style={pg}>
-            You have the following rights regarding your personal data: the right to request deletion of your personal data by contacting us at charan@fitcrave.co; the right to unsubscribe from marketing communications at any time via email unsubscribe links; the right to request access to and a copy of the personal data we hold about you; and the right to request correction of any inaccurate personal data.
+            You have the following rights regarding your personal data: the right to request deletion of your personal data by following the steps on our{" "}
+            <Link to="/account-deletion" style={{ color: t.ac, fontWeight: 600, textDecoration: "none" }}>account deletion page</Link>{" "}
+            or by contacting us at{" "}
+            <a href="mailto:support@fitcrave.app" style={{ color: t.ac, fontWeight: 600, textDecoration: "none" }}>support@fitcrave.app</a>;
+            the right to unsubscribe from marketing communications at any time via email unsubscribe links; the right to request access to and a copy of the personal data we hold about you; and the right to request correction of any inaccurate personal data.
           </p>
 
           <h2 style={hd}>6. Cookies</h2>
