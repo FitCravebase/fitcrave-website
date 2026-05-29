@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { IconBack } from "../icons";
 import { useSiteTheme, FONTS_LINK } from "../theme";
 
-const SUPPORT_EMAIL = "support@fitcrave.app";
+const SUPPORT_EMAIL = "support@fitcrave.co";
 const DELETION_DAYS = 7;
 const BACKUP_RETENTION_DAYS = 30;
 
