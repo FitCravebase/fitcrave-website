@@ -5,6 +5,7 @@ import { doc, getDoc, setDoc, addDoc, collection, getDocs, onSnapshot } from "fi
 import { signInWithEmailAndPassword } from "firebase/auth";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import AccountDeletion from "./pages/AccountDeletion";
+import TermsOfService from "./pages/TermsOfService";
 import { useSiteTheme, FONTS_LINK } from "./theme";
 
 // Default global config — used as fallback before DB loads
@@ -296,6 +297,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
         <Route path="/account-deletion" element={<AccountDeletion />} />
         <Route path="*" element={page === "terms" ? (
           <div style={{ fontFamily: SS, background: t.bg, color: t.tx, minHeight: "100vh" }}>
@@ -614,7 +616,7 @@ export default function App() {
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "flex-end" }}>
             <Link to="/privacy" style={{ fontFamily: SM, fontSize: ".62rem", color: t.tx3, cursor: "pointer", textDecoration: "none", transition: "color .2s" }} onMouseOver={e => e.target.style.color = t.ac} onMouseOut={e => e.target.style.color = t.tx3}>Privacy Policy</Link>
             <Link to="/account-deletion" style={{ fontFamily: SM, fontSize: ".62rem", color: t.tx3, cursor: "pointer", textDecoration: "none", transition: "color .2s" }} onMouseOver={e => e.target.style.color = t.ac} onMouseOut={e => e.target.style.color = t.tx3}>Delete Account</Link>
-            <a onClick={() => navigateTo("terms")} style={{ fontFamily: SM, fontSize: ".62rem", color: t.tx3, cursor: "pointer", textDecoration: "none", transition: "color .2s" }} onMouseOver={e => e.target.style.color = t.ac} onMouseOut={e => e.target.style.color = t.tx3}>Terms of Service</a>
+            <Link to="/terms" style={{ fontFamily: SM, fontSize: ".62rem", color: t.tx3, cursor: "pointer", textDecoration: "none", transition: "color .2s" }} onMouseOver={e => e.target.style.color = t.ac} onMouseOut={e => e.target.style.color = t.tx3}>Terms of Use</Link>
           </div>
           <p style={{ fontFamily: SM, fontSize: ".6rem", color: t.tx3 }}>© {new Date().getFullYear()} FitCrave Pvt. Ltd.</p>
           <p style={{ fontFamily: SM, fontSize: ".55rem", color: t.tx3 }}>Built at IIT Kharagpur, India</p>

@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { IconBack } from "../icons";
 import { useSiteTheme, FONTS_LINK } from "../theme";
 
+const SUPPORT = "support@fitcrave.co";
+
 export default function PrivacyPolicy() {
   const { t, SF, SS, SM, acT } = useSiteTheme();
 
@@ -9,6 +11,8 @@ export default function PrivacyPolicy() {
   const hd = { fontFamily: SF, fontStyle: "italic", fontSize: "1.3rem", marginTop: 40, marginBottom: 14, color: t.tx };
   const sub = { fontFamily: SS, fontWeight: 700, fontSize: ".95rem", marginTop: 24, marginBottom: 10, color: t.tx };
   const pg = { fontSize: ".88rem", lineHeight: 1.85, color: t.tx2, marginBottom: 12 };
+  const li = { fontSize: ".88rem", lineHeight: 1.85, color: t.tx2, marginBottom: 10, paddingLeft: 4 };
+  const link = { color: t.ac, fontWeight: 600, textDecoration: "none" };
 
   return (
     <div style={{ fontFamily: SS, background: t.bg, color: t.tx, minHeight: "100vh" }}>
@@ -46,69 +50,136 @@ export default function PrivacyPolicy() {
               <span style={{ fontFamily: SF, fontStyle: "italic", ...acT }}>Policy</span>
             </h1>
             <p style={{ fontFamily: SM, fontSize: ".68rem", color: t.tx3, marginTop: 12 }}>
-              Last updated: March 2026 · FitCrave Pvt. Ltd.
+              Last updated: August 2026 · FitCrave Pvt. Ltd.
             </p>
           </div>
 
           <p style={pg}>
-            FitCrave Pvt. Ltd. ("FitCrave", "we", "us", "our") is committed to protecting your personal information and your right to privacy. This Privacy Policy describes what information we collect, how we use it, and what rights you have in relation to it. By using FitCrave's services, you agree to the collection and use of information in accordance with this policy.
+            FitCrave Pvt. Ltd. ("FitCrave", "we", "us") operates the FitCrave mobile app and website. This Privacy Policy
+            explains what personal data we collect, why we collect it, how we use and share it, and your choices. It applies
+            to the Android and iOS apps and to fitcrave.co.in. By using FitCrave you agree to this policy.
           </p>
 
-          <h2 style={hd}>1. Information We Collect</h2>
-          <h3 style={sub}>1.1 Information You Provide</h3>
+          <h2 style={hd}>1. Information we collect</h2>
+          <h3 style={sub}>1.1 Account and profile</h3>
           <p style={pg}>
-            When you register for early access, create an account, or use our services, we may collect the following personal information: your email address for account creation, communication, and early access registration; your name for personalization of the FitCrave experience; fitness goals and preferences including but not limited to fat loss, muscle gain, health maintenance, and discipline objectives; and in future releases, health-related inputs such as dietary preferences, meal logs, workout activity, body measurements, and health scores.
+            When you create an account we collect identifiers needed to sign you in and personalize the app: phone number
+            (OTP), Google or Apple account details, email address if you provide one, display name, and profile photo if you
+            upload one. Profile details you enter (age, sex, height, weight, goals, diet type, allergies, activity level,
+            workout preferences) are stored to generate meal and workout plans.
           </p>
-          <h3 style={sub}>1.2 Automatically Collected Information</h3>
+          <h3 style={sub}>1.2 Health and fitness data</h3>
           <p style={pg}>
-            When you interact with our platform, we automatically collect certain information including usage analytics such as pages visited, features used, session duration, and interaction patterns; device information including device type, operating system, browser type, and screen resolution; and approximate location data derived from IP address for service optimization.
+            If you connect Google Health Connect (Android) or Apple Health (iOS), we request read access to steps, active
+            calories burned, sleep, heart rate, resting heart rate, and related health-history records needed to backfill
+            recent days. We also read steps from the on-device pedometer when you allow activity recognition. You may enter
+            steps, calories, sleep, and resting heart rate manually. Meal logs (including photos of food, barcode product
+            data from Open Food Facts, and mess-menu photos), workout logs, and derived metrics such as calorie targets and
+            health score are stored in your account. We use this data only to show your dashboard, plans, and AI coach
+            context — not for advertising.
+          </p>
+          <h3 style={sub}>1.3 Location</h3>
+          <p style={pg}>
+            With your permission we collect precise or approximate location to show local weather on Home and to discover
+            nearby community groups. Location is not used for ads. You can deny location; those features will be limited.
+          </p>
+          <h3 style={sub}>1.4 Camera and media you choose</h3>
+          <p style={pg}>
+            Camera access is used for meal photos, barcode scanning, mess-menu scanning, and community posts. We do not get
+            access to your full photo library. When you pick an image or video, you choose specific items through the system
+            picker.
+          </p>
+          <h3 style={sub}>1.5 Community content</h3>
+          <p style={pg}>
+            Posts, comments, likes, group membership, and media you upload to Community are stored on our servers so other
+            members can see them. Other users can report content and block you.
+          </p>
+          <h3 style={sub}>1.6 Orders and payments</h3>
+          <p style={pg}>
+            If you order food we collect delivery name, phone, address, city, pin code, cart contents, and order status.
+            Payment is handled by Cashfree. We receive payment status and identifiers needed to confirm the order; we do not
+            store your full card or UPI PIN.
+          </p>
+          <h3 style={sub}>1.7 Device, notifications, and diagnostics</h3>
+          <p style={pg}>
+            We collect device type, OS version, app version, language, crash and performance logs, and Firebase Cloud
+            Messaging tokens so we can send order, meal, and workout notifications if you allow them. Firebase Analytics may
+            collect app-usage events. We do not sell this data.
           </p>
 
-          <h2 style={hd}>2. How We Use Your Information</h2>
+          <h2 style={hd}>2. How we use information</h2>
+          <ul style={{ margin: "0 0 20px 20px", padding: 0 }}>
+            <li style={li}>Create and secure your account; send OTPs and sign-in emails.</li>
+            <li style={li}>Generate and update meal plans, workout plans, grocery lists, and AI coach replies.</li>
+            <li style={li}>Show calories, steps, sleep, heart-rate summaries, and progress on Home and in plans.</li>
+            <li style={li}>Operate Community (groups, posts, reports, blocks) and food ordering / delivery tracking.</li>
+            <li style={li}>Send notifications you enable; prevent fraud and abuse; debug crashes; improve the product.</li>
+            <li style={li}>Comply with law and respond to account-deletion and support requests.</li>
+          </ul>
           <p style={pg}>
-            We use the information we collect for the following purposes: to provide AI-powered personalization of nutrition plans, workout programming, health scores, and meal recommendations tailored to your goals; for product improvement by analyzing aggregated usage patterns to improve features, fix issues, and develop new capabilities; for communication purposes including sending early access updates, product announcements, health tips, and service-related notifications; and to maintain platform integrity by preventing misuse, enforcing our Terms of Service, and ensuring community safety.
+            We do not use Health Connect, Apple Health, or other health data to show ads, and we do not sell personal data.
           </p>
 
-          <h2 style={hd}>3. Data Storage and Security</h2>
+          <h2 style={hd}>3. Sharing</h2>
           <p style={pg}>
-            Your data is stored on secure servers with industry-standard protection measures. We implement encryption in transit (TLS/SSL) and at rest for sensitive data. Access to personal data is restricted to authorized personnel only, and we conduct regular security reviews and updates to our infrastructure. While no method of electronic storage is 100% secure, we strive to use commercially acceptable means to protect your personal information.
+            We share data with processors who help us run FitCrave, only as needed for their task:
+          </p>
+          <ul style={{ margin: "0 0 20px 20px", padding: 0 }}>
+            <li style={li}>Google Firebase (Authentication, Firestore, Cloud Storage, Cloud Messaging, Analytics, App Check / Play Integrity).</li>
+            <li style={li}>Google Cloud (API hosting) and MongoDB Atlas (community profiles, posts, comments).</li>
+            <li style={li}>Google Gemini / generative AI providers to create plans, meal-photo estimates, and coach replies using the context you have in the app.</li>
+            <li style={li}>Cashfree for payments; Google Maps for order tracking maps; Open Food Facts for packaged-food lookup.</li>
+            <li style={li}>Kitchen and delivery partners, only order and drop-off details required to fulfill a bowl order.</li>
+          </ul>
+          <p style={pg}>
+            We may disclose information if required by law or to protect users from fraud or serious harm. Community posts
+            you publish are visible to other members of that group.
           </p>
 
-          <h2 style={hd}>4. Third-Party Services</h2>
+          <h2 style={hd}>4. Retention and security</h2>
           <p style={pg}>
-            We may employ third-party companies and services to facilitate our platform, including analytics tools such as Google Analytics, Mixpanel, or similar services to understand usage patterns and improve the product; cloud infrastructure providers for secure data storage and processing; and in future releases, payment processors for subscription billing and meal delivery transactions. These third parties have access to your personal information only to perform specific tasks on our behalf and are obligated not to disclose or use it for any other purpose.
+            We keep account and app data while your account is open. After a verified deletion request we delete or anonymize
+            personal data as described on the{" "}
+            <Link to="/account-deletion" style={link}>account deletion page</Link>
+            , typically within 7 business days, except backups (up to 30 days) and data we must keep for legal, tax, or fraud
+            reasons. We use HTTPS in transit and restrict staff access. No method of storage is 100% secure.
           </p>
 
-          <h2 style={hd}>5. Your Rights</h2>
+          <h2 style={hd}>5. Your rights and choices</h2>
           <p style={pg}>
-            You have the following rights regarding your personal data: the right to request deletion of your personal data by following the steps on our{" "}
-            <Link to="/account-deletion" style={{ color: t.ac, fontWeight: 600, textDecoration: "none" }}>account deletion page</Link>{" "}
-            or by contacting us at{" "}
-            <a href="mailto:support@fitcrave.app" style={{ color: t.ac, fontWeight: 600, textDecoration: "none" }}>support@fitcrave.app</a>;
-            the right to unsubscribe from marketing communications at any time via email unsubscribe links; the right to request access to and a copy of the personal data we hold about you; and the right to request correction of any inaccurate personal data.
+            You can access and update profile, meal, and workout preferences in the app. You can disconnect Health Connect or
+            Apple Health, deny camera, location, or notification permission, and log out. You may request a copy or correction
+            of personal data, or deletion of your account, from Profile → Delete account, this website, or{" "}
+            <a href={`mailto:${SUPPORT}`} style={link}>{SUPPORT}</a>. You can report community posts and block users in the app.
           </p>
 
-          <h2 style={hd}>6. Cookies</h2>
+          <h2 style={hd}>6. Children</h2>
           <p style={pg}>
-            FitCrave uses cookies and similar tracking technologies to maintain your session, remember your preferences, and analyze platform usage. You can control cookie preferences through your browser settings. Essential cookies required for basic platform functionality cannot be disabled while using our service.
+            FitCrave is not directed at children under 16. We do not knowingly collect personal data from children under 16.
+            If you believe we have, contact {SUPPORT} and we will delete it.
           </p>
 
-          <h2 style={hd}>7. Disclaimer</h2>
+          <h2 style={hd}>7. Health disclaimer</h2>
           <div style={{ background: t.bg2, border: `1px solid ${t.bd}`, borderRadius: 14, padding: "24px 22px", margin: "16px 0 24px" }}>
-            <p style={{ ...pg, fontWeight: 600, color: t.warn, marginBottom: 8 }}>Important Health Disclaimer</p>
-            <p style={pg}>
-              FitCrave is a health and fitness technology platform and does not constitute medical advice. The AI-generated nutrition plans, health scores, workout recommendations, and meal suggestions provided by FitCrave are for informational and educational purposes only. Individual results may vary. Always consult a qualified healthcare professional before making significant changes to your diet, exercise routine, or health regimen, especially if you have pre-existing medical conditions.
+            <p style={{ ...pg, fontWeight: 600, color: t.warn, marginBottom: 8 }}>Not medical advice</p>
+            <p style={{ ...pg, marginBottom: 0 }}>
+              FitCrave is a fitness and nutrition technology product. Plans, scores, and AI suggestions are informational.
+              They are not medical advice. Talk to a qualified clinician before major diet or exercise changes.
             </p>
           </div>
 
-          <h2 style={hd}>8. Changes to This Policy</h2>
+          <h2 style={hd}>8. Changes</h2>
           <p style={pg}>
-            We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date. You are advised to review this Privacy Policy periodically.
+            We may update this policy. The "Last updated" date will change. Continued use after an update means you accept
+            the revised policy.
           </p>
 
-          <h2 style={hd}>9. Contact Us</h2>
+          <h2 style={hd}>9. Contact</h2>
           <p style={pg}>
-            If you have any questions about this Privacy Policy, please contact us at charan@fitcrave.co or write to FitCrave Pvt. Ltd., IIT Kharagpur, West Bengal, India.
+            FitCrave Pvt. Ltd., IIT Kharagpur, West Bengal, India ·{" "}
+            <a href={`mailto:${SUPPORT}`} style={link}>{SUPPORT}</a>
+            {" "}· See also our{" "}
+            <Link to="/terms" style={link}>Terms of Use</Link>.
           </p>
         </div>
       </div>
