@@ -61,7 +61,7 @@ export default function TermsOfService() {
 
           <h2 style={hd}>1. Eligibility and account</h2>
           <p style={pg}>
-            You must be at least 16 years old to use FitCrave. You are responsible for the accuracy of information you provide
+            You must be at least 18 years old to use FitCrave. You are responsible for the accuracy of information you provide
             and for activity on your account. Keep your phone, email, and Google sign-in secure. You may request deletion of
             your account at any time from the app or our{" "}
             <Link to="/account-deletion" style={link}>account deletion page</Link>.
@@ -101,7 +101,7 @@ export default function TermsOfService() {
             Community groups, posts, comments, photos, and videos are user-generated. You must not post illegal content,
             harassment, hate speech, sexual content involving minors, spam, scams, or misleading health or medical claims.
             You grant FitCrave a license to host and display content you upload so the Service can function. You can report
-            posts and block users in the app. We may remove content or suspend accounts that violate these Terms. We do not
+            posts and comments and block users in the app. We may remove content or suspend accounts that violate these Terms. We do not
             guarantee that all content is reviewed before it appears.
           </p>
 

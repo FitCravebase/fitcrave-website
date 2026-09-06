@@ -150,12 +150,12 @@ export default function PrivacyPolicy() {
             You can access and update profile, meal, and workout preferences in the app. You can disconnect Health Connect or
             Apple Health, deny camera, location, or notification permission, and log out. You may request a copy or correction
             of personal data, or deletion of your account, from Profile → Delete account, this website, or{" "}
-            <a href={`mailto:${SUPPORT}`} style={link}>{SUPPORT}</a>. You can report community posts and block users in the app.
+            <a href={`mailto:${SUPPORT}`} style={link}>{SUPPORT}</a>. You can report community posts and comments and block users in the app.
           </p>
 
           <h2 style={hd}>6. Children</h2>
           <p style={pg}>
-            FitCrave is not directed at children under 16. We do not knowingly collect personal data from children under 16.
+            FitCrave is not directed at children under 18. We do not knowingly collect personal data from children under 18.
             If you believe we have, contact {SUPPORT} and we will delete it.
           </p>
 
