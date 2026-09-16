@@ -50,14 +50,14 @@ export default function PrivacyPolicy() {
               <span style={{ fontFamily: SF, fontStyle: "italic", ...acT }}>Policy</span>
             </h1>
             <p style={{ fontFamily: SM, fontSize: ".68rem", color: t.tx3, marginTop: 12 }}>
-              Last updated: August 2026 · FitCrave Pvt. Ltd.
+              Last updated: September 2026 · FitCrave Pvt. Ltd.
             </p>
           </div>
 
           <p style={pg}>
-            FitCrave Pvt. Ltd. ("FitCrave", "we", "us") operates the FitCrave mobile app and website. This Privacy Policy
-            explains what personal data we collect, why we collect it, how we use and share it, and your choices. It applies
-            to the Android and iOS apps and to fitcrave.co.in. By using FitCrave you agree to this policy.
+            FitCrave Pvt. Ltd. ("FitCrave", "we", "us") operates the FitCrave consumer app, the FitCrave Partner
+            delivery app, Kitchen OS, and fitcrave.co.in. This Privacy Policy explains what personal data we collect,
+            why we collect it, how we use and share it, and your choices. By using FitCrave products you agree to this policy.
           </p>
 
           <h2 style={hd}>1. Information we collect</h2>
@@ -80,8 +80,23 @@ export default function PrivacyPolicy() {
           </p>
           <h3 style={sub}>1.3 Location</h3>
           <p style={pg}>
-            With your permission we collect precise or approximate location to show local weather on Home and to discover
-            nearby community groups. Location is not used for ads. You can deny location; those features will be limited.
+            In the consumer app, with your permission we collect precise or approximate location to show local weather on Home
+            and to discover nearby community groups. Location is not used for ads. You can deny location; those features will
+            be limited.
+          </p>
+          <h3 id="delivery-partner" style={sub}>1.3a FitCrave Partner (delivery) app</h3>
+          <p style={pg}>
+            If you use FitCrave Partner as a delivery rider, we collect the data needed to assign and complete bowl deliveries:
+          </p>
+          <ul style={{ margin: "0 0 20px 20px", padding: 0 }}>
+            <li style={li}>Account: full name, 10-digit mobile number (Partner ID), vehicle type, assigned kitchen, and a hashed 4-digit PIN. The PIN is verified on our servers; we do not store it in plain text.</li>
+            <li style={li}>Precise location while you have an active delivery (order status "dispatched"), typically every 10 seconds, so the customer can track their order. Sharing stops when the delivery is completed or marked undeliverable. Location is requested only after an in-app explanation, and only while the app is in use for that delivery.</li>
+            <li style={li}>Camera photos you take as proof of delivery or when a drop-off cannot be completed. We do not request access to your full photo library.</li>
+            <li style={li}>Order events you submit (picked up, cash/UPI collected, delivered, undeliverable) and a push-notification token so we can alert you to assigned orders.</li>
+          </ul>
+          <p style={pg}>
+            Partner location and delivery photos are shared with the assigned kitchen and, for live tracking, with the customer
+            for that order only. We do not use Partner data for advertising.
           </p>
           <h3 style={sub}>1.4 Camera and media you choose</h3>
           <p style={pg}>
@@ -147,9 +162,10 @@ export default function PrivacyPolicy() {
 
           <h2 style={hd}>5. Your rights and choices</h2>
           <p style={pg}>
-            You can access and update profile, meal, and workout preferences in the app. You can disconnect Health Connect or
-            Apple Health, deny camera, location, or notification permission, and log out. You may request a copy or correction
-            of personal data, or deletion of your account, from Profile → Delete account, this website, or{" "}
+            You can access and update profile, meal, and workout preferences in the consumer app. Delivery partners can go
+            offline from FitCrave Partner. You can disconnect Health Connect or Apple Health, deny camera, location, or
+            notification permission, and log out. You may request a copy or correction of personal data, or deletion of your
+            account, from Profile → Delete account (consumer), the links in FitCrave Partner, this website, or{" "}
             <a href={`mailto:${SUPPORT}`} style={link}>{SUPPORT}</a>. You can report community posts and comments and block users in the app.
           </p>
 

@@ -52,13 +52,14 @@ export default function AccountDeletion() {
               <span style={{ fontFamily: SF, fontStyle: "italic", ...acT }}>FitCrave account</span>
             </h1>
             <p style={{ fontFamily: SM, fontSize: ".68rem", color: t.tx3, marginTop: 12 }}>
-              FitCrave mobile app · FitCrave Pvt. Ltd.
+              FitCrave consumer app · FitCrave Partner · FitCrave Pvt. Ltd.
             </p>
           </div>
 
           <p style={pg}>
-            This page explains how to request deletion of your <strong style={{ color: t.tx }}>FitCrave</strong> account and
-            associated personal data processed by the FitCrave mobile app. You do not need to sign in to read this page.
+            This page explains how to request deletion of your <strong style={{ color: t.tx }}>FitCrave</strong> consumer
+            account or your <strong style={{ color: t.tx }}>FitCrave Partner</strong> delivery account. You do not need to
+            sign in to read this page.
           </p>
 
           <h2 style={hd}>How to request deletion</h2>
@@ -71,17 +72,26 @@ export default function AccountDeletion() {
               .
             </li>
             <li style={li}>
-              Use the subject line: <strong style={{ color: t.tx }}>FitCrave account deletion request</strong>.
+              Use the subject line: <strong style={{ color: t.tx }}>FitCrave account deletion request</strong> (consumer) or{" "}
+              <strong style={{ color: t.tx }}>FitCrave Partner account deletion request</strong> (delivery).
             </li>
             <li style={li}>
-              In your message, include the sign-in method you use (phone number, Google, or Apple) and any details that help us
-              verify your account (for example, the phone number or email on the account).
+              In your message, include how you sign in. Consumer: phone number, Google, or Apple. Partner: the 10-digit
+              mobile number used as Partner ID, plus your name and kitchen if you know them.
             </li>
             <li style={li}>
               We will verify your request and complete account deletion within{" "}
               <strong style={{ color: t.tx }}>{DELETION_DAYS} business days</strong>.
             </li>
           </ol>
+
+          <h2 id="delivery-partner" style={hd}>FitCrave Partner accounts</h2>
+          <p style={pg}>
+            Deleting a Partner account removes or anonymizes your delivery-partner profile (name, phone, PIN hash, vehicle,
+            kitchen assignment, online status, and FCM token). Proof-of-delivery photos and location points already attached
+            to completed orders may be retained with the order for food-safety, refund, and fraud records, or anonymized.
+            Kitchen managers can also deactivate your login without a full deletion.
+          </p>
 
           <div style={{ background: t.bg2, border: `1px solid ${t.bd}`, borderRadius: 14, padding: "20px 22px", marginBottom: 24 }}>
             <p style={{ ...pg, marginBottom: 0, fontWeight: 600, color: t.tx }}>
@@ -100,6 +110,7 @@ export default function AccountDeletion() {
             <li style={li}>Community data tied to your account on our servers (for example, MongoDB profile, posts, and comments linked to your Firebase user ID).</li>
             <li style={li}>Media you uploaded for community features, where stored in our storage systems (for example, Firebase Cloud Storage).</li>
             <li style={li}>Meal, workout, and health data associated with your account on our backend services.</li>
+            <li style={li}>FitCrave Partner profile data (name, phone/Partner ID, PIN hash, vehicle, kitchen assignment, online status, and push token).</li>
           </ul>
 
           <h2 style={hd}>What we may retain</h2>
